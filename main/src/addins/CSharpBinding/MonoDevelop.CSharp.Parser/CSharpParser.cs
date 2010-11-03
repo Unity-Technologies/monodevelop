@@ -140,11 +140,11 @@ namespace MonoDevelop.CSharp.Parser
 						newType.AddChild (new CSharpTokenNode (Convert (typeArgLocation[1]), 1), MemberReferenceExpression.Roles.RChevron);
 					AddConstraints (newType, c);
 				}
-				if (location != null)
+				if (location != null && location.Count > 1)
 					newType.AddChild (new CSharpTokenNode (Convert (location[1]), 1), AbstractCSharpNode.Roles.LBrace);
 				typeStack.Push (newType);
 				base.Visit (c);
-				if (location != null)
+				if (location != null && location.Count > 2)
 					newType.AddChild (new CSharpTokenNode (Convert (location[2]), 1), AbstractCSharpNode.Roles.RBrace);
 				typeStack.Pop ();
 				AddType (newType);
@@ -169,11 +169,11 @@ namespace MonoDevelop.CSharp.Parser
 						newType.AddChild (new CSharpTokenNode (Convert (typeArgLocation[1]), 1), MemberReferenceExpression.Roles.RChevron);
 					AddConstraints (newType, s);
 				}
-				if (location != null)
+				if (location != null && location.Count > 1)
 					newType.AddChild (new CSharpTokenNode (Convert (location[1]), 1), AbstractCSharpNode.Roles.LBrace);
 				typeStack.Push (newType);
 				base.Visit (s);
-				if (location != null)
+				if (location != null && location.Count > 2)
 					newType.AddChild (new CSharpTokenNode  (Convert (location[2]), 1), AbstractCSharpNode.Roles.RBrace);
 				typeStack.Pop ();
 				AddType (newType);
@@ -198,11 +198,11 @@ namespace MonoDevelop.CSharp.Parser
 						newType.AddChild (new CSharpTokenNode (Convert (typeArgLocation[1]), 1), MemberReferenceExpression.Roles.RChevron);
 					AddConstraints (newType, i);
 				}
-				if (location != null)
+				if (location != null && location.Count > 1)
 					newType.AddChild (new CSharpTokenNode (Convert (location[1]), 1), AbstractCSharpNode.Roles.LBrace);
 				typeStack.Push (newType);
 				base.Visit (i);
-				if (location != null)
+				if (location != null && location.Count > 2)
 					newType.AddChild (new CSharpTokenNode  (Convert (location[2]), 1), AbstractCSharpNode.Roles.RBrace);
 				typeStack.Pop ();
 				AddType (newType);
@@ -241,7 +241,7 @@ namespace MonoDevelop.CSharp.Parser
 			void AddType (INode child)
 			{
 				if (typeStack.Count > 0) {
-					typeStack.Peek ().AddChild (child);
+					typeStack.Peek ().AddChild (child, AbstractNode.Roles.Member);
 				} else {
 					AddToNamespace (child);
 				}
@@ -266,11 +266,11 @@ namespace MonoDevelop.CSharp.Parser
 				if (location != null)
 					newType.AddChild (new CSharpTokenNode (Convert (location[0]), "enum".Length), TypeDeclaration.TypeKeyword);
 				newType.AddChild (new Identifier (e.Name, Convert (e.MemberName.Location)), AbstractNode.Roles.Identifier);
-				if (location != null)
+				if (location != null && location.Count > 1)
 					newType.AddChild (new CSharpTokenNode (Convert (location[1]), 1), AbstractCSharpNode.Roles.LBrace);
 				typeStack.Push (newType);
 				base.Visit (e);
-				if (location != null)
+				if (location != null && location.Count > 2)
 					newType.AddChild (new CSharpTokenNode  (Convert (location[2]), 1), AbstractCSharpNode.Roles.RBrace);
 				typeStack.Pop ();
 				AddType (newType);
@@ -2040,13 +2040,12 @@ namespace MonoDevelop.CSharp.Parser
 					if (location != null)
 						result.AddChild (new CSharpTokenNode (Convert (location[0]), "=>".Length), AssignmentExpression.Roles.Assign);
 				} else {
-					if (location != null && location.Count >= 1)
-						result.AddChild (new CSharpTokenNode (Convert (location[1]), 1), AssignmentExpression.Roles.LPar);
+					result.AddChild (new CSharpTokenNode (Convert (lambdaExpression.Location), 1), AssignmentExpression.Roles.LPar);
 					AddParameter (result, lambdaExpression.Parameters);
-					if (location != null && location.Count >= 3)
-						result.AddChild (new CSharpTokenNode (Convert (location[2]), 1), AssignmentExpression.Roles.RPar);
-					if (location != null)
-						result.AddChild (new CSharpTokenNode (Convert (location[0]), "=>".Length), AssignmentExpression.Roles.Assign);
+					if (location != null) {
+						result.AddChild (new CSharpTokenNode (Convert (location[0]), 1), AssignmentExpression.Roles.RPar);
+						result.AddChild (new CSharpTokenNode (Convert (location[1]), "=>".Length), AssignmentExpression.Roles.Assign);
+					}
 				}
 				if (lambdaExpression.Block.IsCompilerGenerated) {
 					ContextualReturn generatedReturn = (ContextualReturn)lambdaExpression.Block.Statements[0];
