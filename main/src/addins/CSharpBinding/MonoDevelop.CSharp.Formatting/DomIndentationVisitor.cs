@@ -99,11 +99,12 @@ namespace MonoDevelop.CSharp.Formatting
 				line++;
 				lineSegment = data.Document.GetLine (line);
 			} while (lineSegment != null && lineSegment.EditableLength == lineSegment.GetIndentation (data.Document).Length);
-			int start = data.Document.GetLine (loc.Line).EndOffset;
+			var startLine = data.Document.GetLine (loc.Line);
+			int start = startLine.EndOffset;
 			StringBuilder sb = new StringBuilder ();
 			for (int i = 0; i < blankLines; i++)
 				sb.Append (data.EolMarker);
-			int removedChars = lineSegment != null ? lineSegment.Offset - start : 0;
+			int removedChars = lineSegment != null ? lineSegment.Offset - startLine.EndOffset : 0;
 			AddChange (start, removedChars, sb.ToString ());
 		}
 		
@@ -198,7 +199,6 @@ namespace MonoDevelop.CSharp.Formatting
 			
 			if (typeDeclaration.NextSibling is TypeDeclaration || typeDeclaration.NextSibling is DelegateDeclaration)
 				EnsureBlankLinesAfter (typeDeclaration, policy.BlankLinesBetweenTypes);
-			
 			return result;
 		}
 		
@@ -706,6 +706,8 @@ namespace MonoDevelop.CSharp.Formatting
 			string currentText = data.Document.GetTextAt (offset, removedChars);
 			if (currentText == insertedText)
 				return;
+			if (currentText.Any (c => !(char.IsWhiteSpace (c) || c == '\r' || c == '\t')))
+				throw new InvalidOperationException ("Tried to remove non ws chars: '" + currentText + "'");
 			foreach (DomSpacingVisitor.MyTextReplaceChange change in changes) {
 				if (change.Offset == offset) {
 					if (removedChars > 0 && insertedText == change.InsertedText) {
@@ -713,6 +715,13 @@ namespace MonoDevelop.CSharp.Formatting
 //						change.InsertedText = insertedText;
 						return;
 					}
+					if (!string.IsNullOrEmpty (change.InsertedText)) {
+						change.InsertedText += insertedText;
+					} else {
+						change.InsertedText = insertedText;
+					}
+					change.RemovedChars = System.Math.Max (removedChars, change.RemovedChars);
+					return;
 				}
 			}
 //			Console.WriteLine ("offset={0}, removedChars={1}, insertedText={2}", offset, removedChars, insertedText.Replace("\n", "\\n").Replace("\t", "\\t").Replace(" ", "."));

@@ -541,6 +541,7 @@ namespace MonoDevelop.Ide
 						}
 						Save (selectedProject);
 						IdeApp.Workspace.SavePreferences ();
+						IdeApp.Workbench.ReparseOpenDocuments ();
 					}
 				} finally {
 					optionsDialog.Destroy ();
