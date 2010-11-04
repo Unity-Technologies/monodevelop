@@ -122,8 +122,6 @@ namespace Mono.TextEditor
 		
 		public TextEditor () : this(new Document ())
 		{
-			// TODO: Enable accessibility factory
-			//			new TextEditorAccessible.Factory ();
 			textEditorData.Document.LineChanged += UpdateLinesOnTextMarkerHeightChange; 
 		}
 		
@@ -299,6 +297,9 @@ namespace Mono.TextEditor
 			
 			InitAnimations ();
 			this.Document.EndUndo += HandleDocumenthandleEndUndo;
+#if ATK
+			TextEditorAccessible.Factory.Init (this);
+#endif
 		}
 
 		void HandleDocumenthandleEndUndo (object sender, Document.UndoOperationEventArgs e)
