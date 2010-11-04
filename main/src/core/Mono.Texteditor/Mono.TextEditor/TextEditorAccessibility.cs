@@ -23,6 +23,9 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
+
+#if ATK
+
 using System;
 using Atk;
 using System.Collections.Generic;
@@ -351,24 +354,24 @@ namespace Mono.TextEditor
 			}
 		}
 		#endregion
-		/*
 		internal sealed class Factory : Atk.ObjectFactory
 		{
-			public static void Init ()
+			public static void Init (object editor)
 			{
-				Atk.Global.DefaultRegistry.SetFactoryType ((GLib.GType)typeof(TextEditor), (GLib.GType)typeof(TextEditor));
+				Atk.Global.DefaultRegistry.SetFactoryType ((GLib.GType)editor.GetType (), (GLib.GType)typeof(Factory));
 			}
 
 			protected override Atk.Object OnCreateAccessible (GLib.Object obj)
 			{
-				return new TextEditorAccessible ( (TextEditor) obj);
+				// seems to be never get called ?
+				return new TextEditorAccessible ((TextEditor) obj);
 			}
 
 			protected override GLib.GType OnGetAccessibleType ()
 			{
 				return TextEditorAccessible.GType;
 			}
-		}*/
+		}
 	}
 
 	public class BaseWidgetAccessible : Gtk.Accessible, Atk.ComponentImplementor
@@ -594,5 +597,6 @@ namespace Mono.TextEditor
 		#endregion Atk.Component
 		
 	}
-	
+
 }
+#endif
