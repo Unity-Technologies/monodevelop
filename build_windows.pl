@@ -139,5 +139,5 @@ copy "$root/boo-md-addins/build/Boo.MonoDevelop.Util.dll", "$mdRoot/AddIns/Backe
 
 chdir "$root/tmp";
 unlink "$root/MonoDevelop.zip";
-system("\"C:\\Program\ Files\ \(x86\)\\7-zip\7z\" a -r \"$root/MonoDevelop.zip\" *.*");
+system("\"C:\\Program\ Files\ \(x86\)\\7-Zip\7z\" a -r \"$root/MonoDevelop.zip\" *.*");
 chdir "$root";
