@@ -24,33 +24,30 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System;
-using MonoDevelop.Projects.Dom;
-
 namespace MonoDevelop.CSharp.Dom
 {
 	public abstract class AbstractMember : AbstractMemberBase
 	{
 		const int PrivateImplementationTypeRole = 100;
 		
-		public ICSharpNode ReturnType {
+		public DomNode ReturnType {
 			get {
-				return (ICSharpNode)GetChildByRole (Roles.ReturnType);
+				return GetChildByRole (Roles.ReturnType) ?? DomNode.Null;
 			}
 		}
 		
 		/// <summary>
 		/// Only supported on members that can be declared in an interface.
 		/// </summary>
-		public ICSharpNode PrivateImplementationType {
+		public DomNode PrivateImplementationType {
 			get {
-				return (ICSharpNode)GetChildByRole (PrivateImplementationTypeRole);
+				return GetChildByRole (PrivateImplementationTypeRole) ?? DomNode.Null;
 			}
 		}
 		
 		public Identifier NameIdentifier {
 			get {
-				return (Identifier)GetChildByRole (Roles.Identifier);
+				return (Identifier)GetChildByRole (Roles.Identifier) ?? Identifier.Null;
 			}
 		}
 		

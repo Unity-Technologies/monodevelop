@@ -33,6 +33,8 @@ using MonoDevelop.Projects.Dom;
 using MonoDevelop.Projects.Dom.Parser;
 using NUnit.Framework;
 using UnitTests;
+using Mono.CSharp;
+using System.Linq;
 
 namespace MonoDevelop.Projects
 {
@@ -261,7 +263,9 @@ namespace MonoDevelop.Projects
 			Assert.IsTrue (types.Contains ("Library1.CExtraContainerSub"));
 			Assert.IsTrue (types.Contains ("Library1.CExtraContainerInnerSub"));
 			Assert.IsTrue (types.Contains ("Library1.ISimple"));
-			Assert.AreEqual (7, types.Count);
+			Assert.IsTrue (types.Contains ("Library1.TestAttribute"));
+			
+			Assert.AreEqual (8, types.Count);
 		}
 		
 		[Test]
@@ -827,5 +831,59 @@ namespace MonoDevelop.Projects
 			Assert.IsFalse (mainProject.NamespaceExists ("Level1.Level2.Level3.Level4.Level5"), "Level5 shouldn't exist.");
 			Assert.IsFalse (mainProject.NamespaceExists ("Level1.Level3"), "level1.level3 shouldn't exist.");
 		}
+		
+		[Test]
+		public void ClassAttributeTest ()
+		{
+			// Simple get
+			IType type = mainProject.GetType ("CompletionDbTest.AttributeTest");
+			Assert.IsNotNull (type);
+			Assert.AreEqual (1, type.Attributes.Count ());
+			Assert.AreEqual ("Serializable", type.Attributes.First ().Name);
+		}
+		
+		[Test]
+		public void MemberAttributeTest ()
+		{
+			// Simple get
+			IType type = mainProject.GetType ("CompletionDbTest.AttributeTest2");
+			Assert.IsNotNull (type);
+			
+			var prop = type.Properties.First ();
+			Assert.AreEqual (1, prop.Attributes.Count ());
+			Assert.AreEqual ("Obsolete", prop.Attributes.First ().Name);
+			
+			var method = type.Methods.First ();
+			Assert.AreEqual (1, method.Attributes.Count ());
+			Assert.AreEqual ("Obsolete", method.Attributes.First ().Name);
+		}
+		
+		[Test]
+		public void CustomAttributeTest ()
+		{
+			// Simple get
+			IType type = mainProject.GetType ("CompletionDbTest.AttributeTest3");
+			Assert.IsNotNull (type);
+			Assert.AreEqual (1, type.Attributes.Count ());
+			
+			var att = type.Attributes.First ();
+			Assert.AreEqual ("Library1.TestAttribute", att.AttributeType.FullName);
+			Assert.AreEqual (2, att.PositionalArguments.Count);
+			
+			var expr1 = att.PositionalArguments[0] as System.CodeDom.CodePrimitiveExpression;
+			Assert.IsNotNull (expr1);
+			Assert.AreEqual ("str1", expr1.Value);
+			
+			var expr2 = att.PositionalArguments[1] as System.CodeDom.CodePrimitiveExpression;
+			Assert.IsNotNull (expr2);
+			Assert.AreEqual (5, expr2.Value);
+			
+			Assert.AreEqual (1, att.NamedArguments.Count);
+			Assert.IsTrue (att.NamedArguments.ContainsKey ("Blah"));
+			var expr3 = att.NamedArguments["Blah"] as System.CodeDom.CodePrimitiveExpression;
+			Assert.IsNotNull (expr3);
+			Assert.AreEqual ("str2", expr3.Value);
+		}
+		
 	}
 }

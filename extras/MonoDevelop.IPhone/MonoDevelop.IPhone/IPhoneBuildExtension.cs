@@ -68,15 +68,19 @@ namespace MonoDevelop.IPhone
 			
 			var result = new BuildResult ();
 			
-			var sdkVersion = IPhoneSdkVersion.Parse (conf.MtouchSdkVersion);
+			var sdkVersion = conf.MtouchSdkVersion.ResolveIfDefault ();
 			
 			if (!IPhoneFramework.SdkIsInstalled (sdkVersion)) {
 				sdkVersion = IPhoneFramework.GetClosestInstalledSdk (sdkVersion);
 				
-				if (!IPhoneFramework.SdkIsInstalled (sdkVersion)) {
-					result.AddError (
-						string.Format ("Apple iPhone SDK version '{0}' is not installed, and no newer version was found.",
-						conf.MtouchSdkVersion));
+				if (sdkVersion.IsUseDefault || !IPhoneFramework.SdkIsInstalled (sdkVersion)) {
+					if (conf.MtouchSdkVersion.IsUseDefault)
+						result.AddError (
+							string.Format ("The Apple iPhone SDK is not installed."));
+					else
+						result.AddError (
+							string.Format ("Apple iPhone SDK version '{0}' is not installed, and no newer version was found.",
+							conf.MtouchSdkVersion));
 					return result;
 				}
 					
@@ -185,7 +189,7 @@ namespace MonoDevelop.IPhone
 				if (result.Append (ProcessPackaging (monitor, sdkVersion, proj, conf, identity)).ErrorCount > 0)
 					return result;
 			} finally {
-				//if packaging failed, make sure that it's marked as needing buildind
+				//if packaging failed, make sure that it's marked as needing building
 				if (result.ErrorCount > 0 && File.Exists (conf.AppDirectory.Combine ("PkgInfo")))
 					File.Delete (conf.AppDirectory.Combine ("PkgInfo"));	
 			}	
@@ -279,28 +283,29 @@ namespace MonoDevelop.IPhone
 					}
 				}
 				
-				//newer icons
+				//newer icons - see http://developer.apple.com/library/ios/#qa/qa2010/qa1686.html
 				if (v3_2_orNewer && !dict.ContainsKey ("CFBundleIconFiles")) {
 					var arr = new PlistArray ();
 					dict["CFBundleIconFiles"] = arr;
 					
 					if (supportsIPhone)
-						AddIconRelativeIfNotEmpty (proj, arr, proj.BundleIcon);
+						AddIconRelativeIfNotEmpty (proj, arr, proj.BundleIcon, "Icon.png");
+					
+					if (v4_0_orNewer && supportsIPhone)
+						if (!AddIconRelativeIfNotEmpty (proj, arr, proj.BundleIconHigh, "Icon@2x.png"))
+							result.AddWarning ("iPhone high res bundle icon has not been set (iPhone Application options panel)");
+					
+					if (supportsIPad)
+						if (!AddIconRelativeIfNotEmpty (proj, arr, proj.BundleIconIPad, "Icon-72.png"))
+							result.AddWarning ("iPad bundle icon has not been set (iPhone Application options panel)");
 					
 					AddIconRelativeIfNotEmpty (proj, arr, proj.BundleIconSpotlight, "Icon-Small.png");
-					if (supportsIPad) {
-						AddIconRelativeIfNotEmpty (proj, arr, proj.BundleIconIPadSpotlight, "Icon-Small-50.png");
-						if (!AddIconRelativeIfNotEmpty (proj, arr, proj.BundleIconIPad))
-							result.AddWarning ("iPad bundle icon has not been set (iPhone Application options panel)");
-					}
 					
-					if (v4_0_orNewer) {
-						if (supportsIPhone) {
-							if (!AddIconRelativeIfNotEmpty (proj, arr, proj.BundleIconHigh))
-								result.AddWarning ("iPhone high res bundle icon has not been set (iPhone Application options panel)");
-							AddIconRelativeIfNotEmpty (proj, arr, proj.BundleIconSpotlightHigh, "Icon-Small@2x.png");
-						}
-					}
+					if (supportsIPad)
+						AddIconRelativeIfNotEmpty (proj, arr, proj.BundleIconIPadSpotlight, "Icon-Small-50.png");
+					
+					if (v4_0_orNewer && supportsIPhone)
+						AddIconRelativeIfNotEmpty (proj, arr, proj.BundleIconSpotlightHigh, "Icon-Small@2x.png");
 				}
 				
 				SetIfNotPresent (dict, "CFBundleIdentifier", identity.BundleID);
@@ -313,12 +318,27 @@ namespace MonoDevelop.IPhone
 				SetIfNotPresent (dict,  "CFBundleSupportedPlatforms",
 					new PlistArray () { sim? "iPhoneSimulator" : "iPhoneOS" });
 				SetIfNotPresent (dict, "CFBundleVersion", proj.BundleVersion ?? "1.0");
+				
+				var sdkSettings = IPhoneFramework.GetSdkSettings (sdkVersion);
+				var dtSettings = IPhoneFramework.GetDTSettings ();
+				
+				if (!sim) {
+					SetIfNotPresent (dict, "DTCompiler", sdkSettings.DTCompiler);
+					SetIfNotPresent (dict, "DTPlatformBuild", sdkSettings.DTPlatformBuild);
+				}
 				SetIfNotPresent (dict, "DTPlatformName", sim? "iphonesimulator" : "iphoneos");
-				SetIfNotPresent (dict, "DTSDKName", IPhoneFramework.GetDTSdkName (sdkVersion, sim));
+				if (!sim) {
+					SetIfNotPresent (dict, "DTPlatformVersion", dtSettings.DTPlatformVersion);
+				}
+				SetIfNotPresent (dict, "DTSDKName", sim? sdkSettings.AlternateSDK : sdkSettings.CanonicalName);
+				if (!sim) {
+					SetIfNotPresent (dict, "DTXcode", dtSettings.DTXcode);
+					SetIfNotPresent (dict, "DTXcodeBuild", dtSettings.DTXcodeBuild);
+				}
+				
 				SetIfNotPresent (dict,  "LSRequiresIPhoneOS", true);
 				if (v3_2_orNewer)
 					SetIfNotPresent (dict,  "UIDeviceFamily", GetSupportedDevices (proj.SupportedDevices));
-				SetIfNotPresent (dict, "DTPlatformVersion", IPhoneFramework.DTPlatformVersion);
 				
 				SetIfNotPresent (dict, "MinimumOSVersion", conf.MtouchMinimumOSVersion);
 				
@@ -476,7 +496,7 @@ namespace MonoDevelop.IPhone
 			var projFiles = buildData.Items.OfType<ProjectFile> ();
 			string appDir = cfg.AppDirectory;
 			
-			var sdkVersion = IPhoneSdkVersion.Parse (cfg.MtouchSdkVersion);
+			var sdkVersion = cfg.MtouchSdkVersion.ResolveIfDefault ();
 			if (!IPhoneFramework.SdkIsInstalled (sdkVersion))
 				sdkVersion = IPhoneFramework.GetClosestInstalledSdk (sdkVersion);
 			
@@ -526,24 +546,22 @@ namespace MonoDevelop.IPhone
 			bool supportsIPad = (proj.SupportedDevices & TargetDevice.IPad) != 0;
 			var appDir = conf.AppDirectory;
 			
-			if (supportsIPhone) {
-				if (!proj.BundleIcon.IsNullOrEmpty)
-					yield return new FilePair (proj.BundleIcon, appDir.Combine (proj.BundleIcon.FileName));
-			}
+			if (supportsIPhone && !proj.BundleIcon.IsNullOrEmpty)
+					yield return new FilePair (proj.BundleIcon, appDir.Combine ("Icon.png"));
 			
 			if (!proj.BundleIconSpotlight.IsNullOrEmpty)
 				yield return new FilePair (proj.BundleIconSpotlight, appDir.Combine ("Icon-Small.png"));
 			
 			if (v3_2_orNewer && supportsIPad) {
 				if (!proj.BundleIconIPad.IsNullOrEmpty)
-					yield return new FilePair (proj.BundleIconIPad, appDir.Combine (proj.BundleIconIPad.FileName));
+					yield return new FilePair (proj.BundleIconIPad, appDir.Combine ("Icon-72.png"));
 				if (!proj.BundleIconIPadSpotlight.IsNullOrEmpty)
 					yield return new FilePair (proj.BundleIconIPadSpotlight, appDir.Combine ("Icon-Small-50.png"));
 			}
 			
 			if (supportsIPhone && v4_0_orNewer) {
 				if (!proj.BundleIconHigh.IsNullOrEmpty)
-					yield return new FilePair (proj.BundleIconHigh, appDir.Combine (proj.BundleIconHigh.FileName));
+					yield return new FilePair (proj.BundleIconHigh, appDir.Combine ("Icon@2x.png"));
 				if (!proj.BundleIconSpotlightHigh.IsNullOrEmpty)
 					yield return new FilePair (proj.BundleIconSpotlightHigh, appDir.Combine ("Icon-Small@2x.png"));
 			}

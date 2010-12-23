@@ -132,7 +132,7 @@ namespace MonoDevelop.Projects.Dom.Parser
 		static IEnumerable<ParserNode> Parsers {
 			get {
 				if (parsers == null) {
-					LoggingService.Trace ("ProjectDomService", "Initializing");
+					Counters.ParserServiceInitialization.BeginTiming ();
 					parsers = new List<ParserNode> ();
 					AddinManager.AddExtensionNodeHandler ("/MonoDevelop/ProjectModel/DomParser", delegate (object sender, ExtensionNodeEventArgs args) {
 						switch (args.Change) {
@@ -144,7 +144,7 @@ namespace MonoDevelop.Projects.Dom.Parser
 							break;
 						}
 					});
-					LoggingService.Trace ("ProjectDomService", "Initialized");
+					Counters.ParserServiceInitialization.EndTiming ();
 				}
 				return parsers;
 			}
@@ -935,6 +935,8 @@ namespace MonoDevelop.Projects.Dom.Parser
 				
 				if (fileContent == null) {
 					try {
+						if (!File.Exists (fileName))
+							return null;
 						using (StreamReader sr = File.OpenText (fileName)) {
 							fileContent = sr.ReadToEnd();
 						}

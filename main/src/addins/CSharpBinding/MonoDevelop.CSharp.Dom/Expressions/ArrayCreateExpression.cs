@@ -1,10 +1,10 @@
 // 
-// ICSharpNode.cs
+// ObjectCreateExpression.cs
 //  
 // Author:
 //       Mike Krüger <mkrueger@novell.com>
 // 
-// Copyright (c) 2009 Novell, Inc (http://www.novell.com)
+// Copyright (c) 2010 Novell, Inc (http://www.novell.com)
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -24,34 +24,24 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System;
-using MonoDevelop.Projects.Dom;
 
 namespace MonoDevelop.CSharp.Dom
 {
-	public enum NodeType
+	public class ArrayCreateExpression : ObjectCreateExpression
 	{
-		Unknown,
-		
-		Type,
-		Member,
-		Statement,
-		Expression,
-		Token
-	}
-	
-	public interface ICSharpNode : INode
-	{
-		NodeType NodeType {
-			get;
+		public override NodeType NodeType {
+			get {
+				return NodeType.Expression;
+			}
 		}
-		DomLocation StartLocation {
-			get;
-		}
-		DomLocation EndLocation {
-			get;
+
+		public CSharpTokenNode Rank {
+			get { return (CSharpTokenNode)GetChildByRole (Roles.RPar) ?? CSharpTokenNode.Null; }
 		}
 		
-		S AcceptVisitor<T, S> (ICSharpDomVisitor<T, S> visitor, T data);
+		public override S AcceptVisitor<T, S> (DomVisitor<T, S> visitor, T data)
+		{
+			return visitor.VisitArrayCreateExpression (this, data);
+		}
 	}
 }

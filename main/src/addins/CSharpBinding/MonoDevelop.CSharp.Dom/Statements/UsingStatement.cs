@@ -24,12 +24,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System;
-using MonoDevelop.Projects.Dom;
-
 namespace MonoDevelop.CSharp.Dom
 {
-	public class UsingStatement : AbstractCSharpNode
+	public class UsingStatement : DomNode
 	{
 		public override NodeType NodeType {
 			get {
@@ -37,24 +34,24 @@ namespace MonoDevelop.CSharp.Dom
 			}
 		}
 
-		public INode Statement {
-			get { return GetChildByRole (Roles.Statement); }
+		public DomNode Statement {
+			get { return GetChildByRole (Roles.Statement) ?? DomNode.Null; }
 		}
 		
-		public ICSharpNode EmbeddedStatement {
-			get { return (ICSharpNode)GetChildByRole (Roles.EmbeddedStatement); }
+		public DomNode EmbeddedStatement {
+			get { return GetChildByRole (Roles.EmbeddedStatement) ?? DomNode.Null; }
 		}
 		
 		public CSharpTokenNode LPar {
-			get { return (CSharpTokenNode)GetChildByRole (Roles.LPar); }
+			get { return (CSharpTokenNode)GetChildByRole (Roles.LPar) ?? CSharpTokenNode.Null; }
 		}
 		
 		public CSharpTokenNode RPar {
-			get { return (CSharpTokenNode)GetChildByRole (Roles.RPar); }
+			get { return (CSharpTokenNode)GetChildByRole (Roles.RPar) ?? CSharpTokenNode.Null; }
 		}
 		
 		
-		public override S AcceptVisitor<T, S> (ICSharpDomVisitor<T, S> visitor, T data)
+		public override S AcceptVisitor<T, S> (DomVisitor<T, S> visitor, T data)
 		{
 			return visitor.VisitUsingStatement (this, data);
 		}

@@ -24,9 +24,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System;
-using MonoDevelop.Projects.Dom;
-
 namespace MonoDevelop.CSharp.Dom
 {
 	public enum FieldDirection
@@ -36,7 +33,7 @@ namespace MonoDevelop.CSharp.Dom
 		Ref
 	}
 	
-	public class DirectionExpression  : AbstractCSharpNode
+	public class DirectionExpression  : DomNode
 	{
 		public override NodeType NodeType {
 			get {
@@ -51,14 +48,14 @@ namespace MonoDevelop.CSharp.Dom
 		
 		
 		public CSharpTokenNode Keyword {
-			get { return (CSharpTokenNode)GetChildByRole (Roles.Keyword); }
+			get { return (CSharpTokenNode)GetChildByRole (Roles.Keyword) ?? CSharpTokenNode.Null; }
 		}
 		
-		public ICSharpNode Expression {
-			get { return (ICSharpNode)GetChildByRole (Roles.Expression); }
+		public DomNode Expression {
+			get { return GetChildByRole (Roles.Expression) ?? DomNode.Null; }
 		}
 		
-		public override S AcceptVisitor<T, S> (ICSharpDomVisitor<T, S> visitor, T data)
+		public override S AcceptVisitor<T, S> (DomVisitor<T, S> visitor, T data)
 		{
 			return visitor.VisitDirectionExpression (this, data);
 		}

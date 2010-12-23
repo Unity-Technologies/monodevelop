@@ -187,7 +187,24 @@ namespace MonoDevelop.Ide.Gui
 		public void SwitchView (IAttachableViewContent view)
 		{
 			if (subViewNotebook != null)
-				ShowPage (subViewContents.IndexOf (view));
+				// adding 1 because subviews start at the position 1 of the tab strip. Position 0 is
+				// for the main view
+				ShowPage (subViewContents.IndexOf (view) + 1);
+		}
+		
+		public int FindView (Type viewType)
+		{
+			if (viewType.Equals (ViewContent.GetType ()))
+				return 0;
+				
+			int i = 1;
+			foreach (IAttachableViewContent item in SubViewContents) {
+				if (viewType.Equals (item.GetType ()))
+					return i;
+				i++;
+			}
+			
+			return -1;
 		}
 		
 		public void SelectWindow()	
@@ -503,7 +520,7 @@ namespace MonoDevelop.Ide.Gui
 		
 		protected void ShowPage (int npage)
 		{
-			if (updating) return;
+			if (updating || npage < 0) return;
 			updating = true;
 			subViewToolbar.ActiveTab = npage;
 			updating = false;

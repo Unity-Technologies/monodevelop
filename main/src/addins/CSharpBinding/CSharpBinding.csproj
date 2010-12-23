@@ -225,9 +225,6 @@
     <Compile Include="MonoDevelop.CSharp.Dom\Expressions\AsExpression.cs" />
     <Compile Include="MonoDevelop.CSharp.Dom\Expressions\IsExpression.cs" />
     <Compile Include="MonoDevelop.CSharp.Dom\Expressions\DefaultValueExpression.cs" />
-    <Compile Include="MonoDevelop.CSharp.Dom\ICSharpNode.cs" />
-    <Compile Include="MonoDevelop.CSharp.Dom\ICSharpDomVisitor.cs" />
-    <Compile Include="MonoDevelop.CSharp.Dom\AbstractCSharpNode.cs" />
     <Compile Include="MonoDevelop.CSharp.Dom\Identifier.cs" />
     <Compile Include="MonoDevelop.CSharp.Dom\QualifiedIdentifier.cs" />
     <Compile Include="MonoDevelop.CSharp.Dom\Expressions\IdentifierExpression.cs" />
@@ -236,7 +233,6 @@
     <Compile Include="MonoDevelop.CSharp.Dom\Expressions\ObjectCreateExpression.cs" />
     <Compile Include="MonoDevelop.CSharp.Dom\Expressions\QueryExpression.cs" />
     <Compile Include="MonoDevelop.CSharp.Parser\CSharpParser.cs" />
-    <Compile Include="MonoDevelop.CSharp.Dom\GeneralScope\EnumDeclaration.cs" />
     <Compile Include="MonoDevelop.CSharp.Resolver\NRefactoryResolver.cs" />
     <Compile Include="MonoDevelop.CSharp.Resolver\ResolveVisitor.cs" />
     <Compile Include="MonoDevelop.CSharp.Resolver\NewCSharpExpressionFinder.cs" />
@@ -272,7 +268,6 @@
     <Compile Include="MonoDevelop.CSharp.Completion\NRefactoryParameterDataProvider.cs" />
     <Compile Include="MonoDevelop.CSharp.Completion\NRefactoryTemplateParameterDataProvider.cs" />
     <Compile Include="MonoDevelop.CSharp.Dom\CompilationUnit.cs" />
-    <Compile Include="MonoDevelop.CSharp.Dom\AbtractCSharpDomVisitor.cs" />
     <Compile Include="MonoDevelop.CSharp.Dom\CSharpTokenNode.cs" />
     <Compile Include="MonoDevelop.CSharp.Dom\FullTypeName.cs" />
     <Compile Include="MonoDevelop.CSharp.Dom\Statements\ExpressionStatement.cs" />
@@ -281,10 +276,8 @@
     <Compile Include="MonoDevelop.CSharp.Formatting\Indent.cs" />
     <Compile Include="MonoDevelop.CSharp.Formatting\DomSpacingVisitor.cs" />
     <Compile Include="MonoDevelop.CSharp.Dom\CSharpModifierToken.cs" />
-    <Compile Include="MonoDevelop.CSharp.Dom\Expressions\ArrayObjectCreateExpression.cs" />
     <Compile Include="MonoDevelop.CSharp.Dom\Expressions\ArgListExpression.cs" />
     <Compile Include="MonoDevelop.CSharp.Dom\Expressions\LambdaExpression.cs" />
-    <Compile Include="MonoDevelop.CSharp.Dom\TypeMembers\ParameterDeclarationExpression.cs" />
     <Compile Include="MonoDevelop.CSharp.Dom\GeneralScope\Constraint.cs" />
     <Compile Include="MonoDevelop.CSharp.Formatting\OnTheFlyFormatter.cs" />
     <Compile Include="MonoDevelop.CSharp.Highlighting\HighlightUsagesExtension.cs" />
@@ -364,6 +357,16 @@
     <Compile Include="MonoDevelop.CSharp.Formatting\FormattingProfileService.cs" />
     <Compile Include="MonoDevelop.CSharp.Dom\ComposedType.cs" />
     <Compile Include="MonoDevelop.CSharp.Dom\Expressions\DirectionExpression.cs" />
+    <Compile Include="MonoDevelop.CSharp.Dom\Expressions\ArrayInitializerExpression.cs" />
+    <Compile Include="MonoDevelop.CSharp.Dom\Expressions\ArrayCreateExpression.cs" />
+    <Compile Include="MonoDevelop.CSharp.Dom\NodeType.cs" />
+    <Compile Include="MonoDevelop.CSharp.Dom\TypeMembers\Accessor.cs" />
+    <Compile Include="MonoDevelop.CSharp.Parser\mcs\assembly.cs" />
+    <Compile Include="MonoDevelop.CSharp.Dom\DomNode.cs" />
+    <Compile Include="MonoDevelop.CSharp.Dom\DomVisitor.cs" />
+    <Compile Include="MonoDevelop.CSharp.Dom\TypeMembers\ParameterDeclaration.cs" />
+    <Compile Include="MonoDevelop.CSharp.Dom\TypeMembers\EnumMemberDeclaration.cs" />
+    <Compile Include="MonoDevelop.CSharp.Dom\GeneralScope\Comment.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="ChangeLog" />

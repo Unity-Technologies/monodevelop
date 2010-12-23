@@ -24,7 +24,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace MonoDevelop.CSharp.Dom
 {
@@ -65,7 +66,7 @@ namespace MonoDevelop.CSharp.Dom
 		Explicit
 	}
 	
-	public class OperatorDeclaration : MethodDeclaration
+	public class OperatorDeclaration : AbstractMember
 	{
 		public const int OperatorKeywordRole = 100;
 		public const int OperatorTypeRole = 101;
@@ -88,7 +89,32 @@ namespace MonoDevelop.CSharp.Dom
 			get { return (CSharpTokenNode)GetChildByRole (OperatorTypeRole); }
 		}
 		
-		public override S AcceptVisitor<T, S> (ICSharpDomVisitor<T, S> visitor, T data)
+		public IEnumerable<ParameterDeclaration> Parameters { 
+			get {
+				return base.GetChildrenByRole (Roles.Parameter).Cast <ParameterDeclaration> ();
+			}
+		}
+		
+		public CSharpTokenNode LPar {
+			get { return (CSharpTokenNode)GetChildByRole (Roles.LPar) ?? CSharpTokenNode.Null; }
+		}
+		
+		public CSharpTokenNode RPar {
+			get { return (CSharpTokenNode)GetChildByRole (Roles.RPar) ?? CSharpTokenNode.Null; }
+		}
+		
+		public BlockStatement Body {
+			get {
+				return (BlockStatement)GetChildByRole (Roles.Body) ?? BlockStatement.Null;
+			}
+		}
+		
+		public static string GetName(OperatorType type)
+		{
+			return Mono.CSharp.Operator.GetMetadataName((Mono.CSharp.Operator.OpType)type);
+		}
+		
+		public override S AcceptVisitor<T, S> (DomVisitor<T, S> visitor, T data)
 		{
 			return visitor.VisitOperatorDeclaration (this, data);
 		}

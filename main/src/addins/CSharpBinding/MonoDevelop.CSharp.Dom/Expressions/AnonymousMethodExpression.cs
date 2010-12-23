@@ -24,33 +24,47 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace MonoDevelop.CSharp.Dom
 {
-	public class AnonymousMethodExpression : AbstractCSharpNode
+	public class AnonymousMethodExpression : DomNode
 	{
 		public override NodeType NodeType {
 			get {
 				return NodeType.Expression;
 			}
 		}
-
-		public IEnumerable<ParameterDeclarationExpression> Arguments { 
+		
+		// used to make a difference between delegate {} and delegate () {} 
+		public bool HasParameterList {
 			get {
-				return base.GetChildrenByRole (Roles.Argument).Cast <ParameterDeclarationExpression>();
+				return GetChildByRole (Roles.LPar) != null;
+			}
+		}
+		
+		public CSharpTokenNode LPar {
+			get { return (CSharpTokenNode)GetChildByRole (Roles.LPar) ?? CSharpTokenNode.Null; }
+		}
+		
+		public CSharpTokenNode RPar {
+			get { return (CSharpTokenNode)GetChildByRole (Roles.RPar) ?? CSharpTokenNode.Null; }
+		}
+		
+		public IEnumerable<ParameterDeclaration> Parameters { 
+			get {
+				return base.GetChildrenByRole (Roles.Parameter).Cast <ParameterDeclaration> ();
 			}
 		}
 		
 		public BlockStatement Body {
 			get {
-				return (BlockStatement)GetChildByRole (Roles.Body);
+				return (BlockStatement)GetChildByRole (Roles.Body) ?? BlockStatement.Null;
 			}
 		}
 		
-		public override S AcceptVisitor<T, S> (ICSharpDomVisitor<T, S> visitor, T data)
+		public override S AcceptVisitor<T, S> (DomVisitor<T, S> visitor, T data)
 		{
 			return visitor.VisitAnonymousMethodExpression (this, data);
 		}

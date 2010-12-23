@@ -24,12 +24,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System;
-using MonoDevelop.Projects.Dom;
-
 namespace MonoDevelop.CSharp.Dom
 {
-	public class ForeachStatement : AbstractCSharpNode
+	public class ForeachStatement : DomNode
 	{
 		public const int ForEachKeywordRole = 100;
 		public const int InKeywordRole = 101;
@@ -40,24 +37,24 @@ namespace MonoDevelop.CSharp.Dom
 			}
 		}
 
-		public ICSharpNode EmbeddedStatement {
-			get { return (ICSharpNode)GetChildByRole (Roles.EmbeddedStatement); }
+		public DomNode EmbeddedStatement {
+			get { return GetChildByRole (Roles.EmbeddedStatement) ?? DomNode.Null; }
 		}
 		
-		public INode Expression {
-			get { return GetChildByRole (Roles.Initializer); }
+		public DomNode Expression {
+			get { return GetChildByRole (Roles.Initializer) ?? DomNode.Null; }
 		}
 		
-		public ICSharpNode VariableType {
-			get { return (ICSharpNode)GetChildByRole (Roles.ReturnType); }
+		public DomNode VariableType {
+			get { return GetChildByRole (Roles.ReturnType) ?? DomNode.Null; }
 		}
 		
 		public CSharpTokenNode LPar {
-			get { return (CSharpTokenNode)GetChildByRole (Roles.LPar); }
+			get { return (CSharpTokenNode)GetChildByRole (Roles.LPar) ?? CSharpTokenNode.Null; }
 		}
 		
 		public CSharpTokenNode RPar {
-			get { return (CSharpTokenNode)GetChildByRole (Roles.RPar); }
+			get { return (CSharpTokenNode)GetChildByRole (Roles.RPar) ?? CSharpTokenNode.Null; }
 		}
 		
 		public string VariableName {
@@ -68,11 +65,11 @@ namespace MonoDevelop.CSharp.Dom
 		
 		public Identifier VariableNameIdentifier {
 			get {
-				return (Identifier)GetChildByRole (Roles.Identifier);
+				return (Identifier)GetChildByRole (Roles.Identifier) ?? Identifier.Null;
 			}
 		}
 		
-		public override S AcceptVisitor<T, S> (ICSharpDomVisitor<T, S> visitor, T data)
+		public override S AcceptVisitor<T, S> (DomVisitor<T, S> visitor, T data)
 		{
 			return visitor.VisitForeachStatement (this, data);
 		}

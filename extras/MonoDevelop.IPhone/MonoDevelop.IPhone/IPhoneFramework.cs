@@ -43,6 +43,9 @@ public static class IPhoneFramework
 		static bool? simOnly = null;
 		static IPhoneSdkVersion[] installedSdkVersions, knownOSVersions;
 		
+		const string PLAT_PLIST = "/Developer/Platforms/iPhoneOS.platform/Info.plist";
+		const string SIM_PLIST = "/Developer/Platforms/iPhoneOSSimulator.platform/Info.plist";
+		
 		public static bool IsInstalled {
 			get {
 				if (!isInstalled.HasValue) {
@@ -70,10 +73,19 @@ public static class IPhoneFramework
 			return res;
 		}
 		
+		static FilePath GetSdkPath (string version)
+		{
+			return "/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS" + version + ".sdk";
+		}
+		
+		static string GetSdkPlistFilename (string version)
+		{
+			return GetSdkPath (version).Combine ("SDKSettings.plist");
+		}
+		
 		public static bool SdkIsInstalled (string version)
 		{
-			return File.Exists ("/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS"
-			                    + version + ".sdk/ResourceRules.plist");
+			return File.Exists (GetSdkPlistFilename (version));
 		}
 		
 		public static bool SdkIsInstalled (IPhoneSdkVersion version)
@@ -81,64 +93,70 @@ public static class IPhoneFramework
 			return SdkIsInstalled (version.ToString ());
 		}
 		
-		static PlistDocument LoadSdkSettings (IPhoneSdkVersion sdk)
-		{
-			var doc = new PlistDocument ();
-			doc.LoadFromXmlFile ("/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS" + sdk.ToString ()
-			                     + ".sdk/SDKSettings.plist");
-			return doc;
-		}
+		static Dictionary<string,DTSdkSettings> sdkSettingsCache = new Dictionary<string,DTSdkSettings> ();
 		
-		static Dictionary<string,string> dtSdkName = new Dictionary<string, string> ();
-		static Dictionary<string,string> dtSdkNameSim = new Dictionary<string, string> ();
-		
-		public static string GetDTSdkName (IPhoneSdkVersion sdk, bool sim)
+		public static DTSdkSettings GetSdkSettings (IPhoneSdkVersion sdk)
 		{
-			var cache = sim? dtSdkNameSim : dtSdkName;
-			string name;
-			if (cache.TryGetValue (sdk.ToString (), out name))
-				return name;
+			DTSdkSettings settings;
+			if (sdkSettingsCache.TryGetValue (sdk.ToString (), out settings))
+				return settings;
 			
-			string keyName = sim? "AlternateSDK" : "CanonicalName";
-			var doc = LoadSdkSettings (sdk);
+			settings = new DTSdkSettings ();
+			var doc = new PlistDocument ();
+			doc.LoadFromXmlFile (GetSdkPlistFilename (sdk.ToString ()));
 			var dict = (PlistDictionary) doc.Root;
-			return cache[sdk.ToString ()] = ((PlistString) dict[keyName]).Value;
+			
+			settings.AlternateSDK = ((PlistString)dict["AlternateSDK"]).Value;
+			settings.CanonicalName = ((PlistString)dict["CanonicalName"]).Value;
+			var props = (PlistDictionary) dict["DefaultProperties"];
+			settings.DTCompiler = ((PlistString)props["GCC_VERSION"]).Value;
+			
+			var sdkPath = GetSdkPath (sdk.ToString ());
+			var file = sdkPath + "/System/Library/CoreServices/SystemVersion.plist";
+			settings.DTPlatformBuild = GrabRootString (file, "ProductBuildVersion");
+			
+			sdkSettingsCache[sdk.ToString ()] = settings;
+			return settings;
 		}
 		
-		static PlistDocument LoadDTSettings ()
+		static DTSettings dtSettings;
+		
+		public static DTSettings GetDTSettings ()
+		{
+			if (dtSettings != null)
+				return dtSettings;
+			
+			var doc = new PlistDocument ();
+			doc.LoadFromXmlFile (PLAT_PLIST);
+			var dict = (PlistDictionary) doc.Root;
+			var infos = (PlistDictionary) dict["AdditionalInfo"];
+			var vals = new DTSettings ();
+			
+			vals.DTPlatformVersion = ((PlistString)infos["DTPlatformVersion"]).Value;
+			
+			var xcodeVersion = GrabRootString ("/Developer/Applications/Xcode.app/Contents/Info.plist", "CFBundleShortVersionString");
+			vals.DTXcode = "0" + xcodeVersion.Replace (".", "");
+			
+			vals.DTXcodeBuild = GrabRootString ("/Developer/Library/version.plist", "ProductBuildVersion");
+			
+			return (dtSettings = vals);
+		}
+		
+		static string GrabRootString (string file, string key)
 		{
 			var doc = new PlistDocument ();
-			doc.LoadFromXmlFile ("/Developer/Platforms/iPhoneOS.platform/Info.plist");
-			return doc;
+			doc.LoadFromXmlFile (file);
+			return ((PlistString) ((PlistDictionary)doc.Root)[key]).Value;
 		}
-		
-		static string dtPlatformVersion;
-		
-		public static string DTPlatformVersion {
-			get {
-				if (dtPlatformVersion == null) {
-					var doc = LoadDTSettings ();
-					var dict = (PlistDictionary) doc.Root;
-					var settings = (PlistDictionary) dict["AdditionalInfo"];
-					dtPlatformVersion = ((PlistString) settings["DTPlatformVersion"]).Value;
-				}
-				return dtPlatformVersion;
-			}
-		}
-		
+			
 		public static IPhoneSdkVersion GetClosestInstalledSdk (IPhoneSdkVersion v)
 		{
-			IPhoneSdkVersion? previous = null;
+			//sorted low to high, so get first that's >= requested version
 			foreach (var i in InstalledSdkVersions) {
-				var cmp = v.CompareTo (i);
-				if (cmp == 0) {
+				if (i.CompareTo (v) >= 0)
 					return i;
-				} else if (cmp > 0) {
-					return previous ?? i;	
-				}
-				previous = i;
 			}
-			return IPhoneSdkVersion.Default;
+			return IPhoneSdkVersion.UseDefault;
 		}
 		
 		public static IList<IPhoneSdkVersion> InstalledSdkVersions {
@@ -210,6 +228,9 @@ public static class IPhoneFramework
 			
 			var sdks = new List<string> ();
 			foreach (var dir in Directory.GetDirectories (sdkDir)) {
+				if (!File.Exists (dir + "/SDKSettings.plist"))
+					continue;
+				
 				string d = dir.Substring (sdkDir.Length);
 				if (d.StartsWith ("iPhoneOS"))
 					d = d.Substring ("iPhoneOS".Length);
@@ -267,6 +288,21 @@ public static class IPhoneFramework
 			dialog.ShowAll ();
 			
 			MessageService.ShowCustomDialog (dialog);
+		}
+
+		public class DTSettings
+		{
+			public string DTXcode { get; set; }
+			public string DTXcodeBuild { get; set; }
+			public string DTPlatformVersion { get; set; }
+		}
+
+		public class DTSdkSettings
+		{
+			public string CanonicalName { get; set; }
+			public string AlternateSDK { get; set; }
+			public string DTCompiler { get; set; }
+			public string DTPlatformBuild { get; set; }
 		}
 	}
 	

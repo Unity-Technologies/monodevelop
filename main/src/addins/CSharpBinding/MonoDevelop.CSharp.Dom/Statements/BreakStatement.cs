@@ -24,12 +24,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System;
-using MonoDevelop.Projects.Dom;
-
 namespace MonoDevelop.CSharp.Dom
 {
-	public class BreakStatement : AbstractCSharpNode
+	public class BreakStatement : DomNode
 	{
 		public override NodeType NodeType {
 			get {
@@ -37,13 +34,13 @@ namespace MonoDevelop.CSharp.Dom
 			}
 		}
 
-		public INode BreakKeyword {
+		public CSharpTokenNode BreakKeyword {
 			get {
-				return GetChildByRole (Roles.Keyword);
+				return (CSharpTokenNode)GetChildByRole (Roles.Keyword) ?? CSharpTokenNode.Null;
 			}
 		}
 		
-		public override S AcceptVisitor<T, S> (ICSharpDomVisitor<T, S> visitor, T data)
+		public override S AcceptVisitor<T, S> (DomVisitor<T, S> visitor, T data)
 		{
 			return visitor.VisitBreakStatement (this, data);
 		}

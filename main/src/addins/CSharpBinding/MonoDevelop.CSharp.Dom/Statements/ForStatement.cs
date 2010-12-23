@@ -24,13 +24,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System;
-using MonoDevelop.Projects.Dom;
 using System.Collections.Generic;
 
 namespace MonoDevelop.CSharp.Dom
 {
-	public class ForStatement : AbstractCSharpNode
+	public class ForStatement : DomNode
 	{
 		public override NodeType NodeType {
 			get {
@@ -38,31 +36,31 @@ namespace MonoDevelop.CSharp.Dom
 			}
 		}
 
-		public ICSharpNode EmbeddedStatement {
-			get { return (ICSharpNode)GetChildByRole (Roles.EmbeddedStatement); }
+		public DomNode EmbeddedStatement {
+			get { return GetChildByRole (Roles.EmbeddedStatement) ?? DomNode.Null; }
 		}
 		
-		public INode Condition {
-			get { return GetChildByRole (Roles.Condition); }
+		public DomNode Condition {
+			get { return GetChildByRole (Roles.Condition) ?? DomNode.Null; }
 		}
 		
-		public IEnumerable<INode> Initializers {
+		public IEnumerable<DomNode> Initializers {
 			get { return GetChildrenByRole (Roles.Initializer); }
 		}
 		
-		public IEnumerable<INode> Iterators {
+		public IEnumerable<DomNode> Iterators {
 			get { return GetChildrenByRole (Roles.Iterator); }
 		}
 		
 		public CSharpTokenNode LPar {
-			get { return (CSharpTokenNode)GetChildByRole (Roles.LPar); }
+			get { return (CSharpTokenNode)GetChildByRole (Roles.LPar) ?? CSharpTokenNode.Null; }
 		}
 		
 		public CSharpTokenNode RPar {
-			get { return (CSharpTokenNode)GetChildByRole (Roles.RPar); }
+			get { return (CSharpTokenNode)GetChildByRole (Roles.RPar) ?? CSharpTokenNode.Null; }
 		}
 		
-		public override S AcceptVisitor<T, S> (ICSharpDomVisitor<T, S> visitor, T data)
+		public override S AcceptVisitor<T, S> (DomVisitor<T, S> visitor, T data)
 		{
 			return visitor.VisitForStatement (this, data);
 		}

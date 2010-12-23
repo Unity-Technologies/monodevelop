@@ -24,14 +24,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System;
-using System.Linq;
-using MonoDevelop.Projects.Dom;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace MonoDevelop.CSharp.Dom
 {
-	public class SwitchStatement : AbstractCSharpNode
+	public class SwitchStatement : DomNode
 	{
 		public const int SwitchSectionRole = 100;
 		
@@ -41,8 +39,8 @@ namespace MonoDevelop.CSharp.Dom
 			}
 		}
 
-		public INode Expression {
-			get { return GetChildByRole (Roles.Expression); }
+		public DomNode Expression {
+			get { return GetChildByRole (Roles.Expression) ?? DomNode.Null; }
 		}
 		
 		public IEnumerable<SwitchSection> SwitchSections {
@@ -50,27 +48,28 @@ namespace MonoDevelop.CSharp.Dom
 		}
 		
 		public CSharpTokenNode LPar {
-			get { return (CSharpTokenNode)GetChildByRole (Roles.LPar); }
+			get { return (CSharpTokenNode)GetChildByRole (Roles.LPar) ?? CSharpTokenNode.Null; }
 		}
 		
 		public CSharpTokenNode RPar {
-			get { return (CSharpTokenNode)GetChildByRole (Roles.RPar); }
+			get { return (CSharpTokenNode)GetChildByRole (Roles.RPar) ?? CSharpTokenNode.Null; }
 		}
+		
 		public CSharpTokenNode LBrace {
-			get { return (CSharpTokenNode)GetChildByRole (Roles.LBrace); }
+			get { return (CSharpTokenNode)GetChildByRole (Roles.LBrace) ?? CSharpTokenNode.Null; }
 		}
 		
 		public CSharpTokenNode RBrace {
-			get { return (CSharpTokenNode)GetChildByRole (Roles.RBrace); }
+			get { return (CSharpTokenNode)GetChildByRole (Roles.RBrace) ?? CSharpTokenNode.Null; }
 		}
 		
-		public override S AcceptVisitor<T, S> (ICSharpDomVisitor<T, S> visitor, T data)
+		public override S AcceptVisitor<T, S> (DomVisitor<T, S> visitor, T data)
 		{
 			return visitor.VisitSwitchStatement (this, data);
 		}
 	}
 	
-	public class SwitchSection : AbstractCSharpNode
+	public class SwitchSection : DomNode
 	{
 		public const int CaseLabelRole = 100;
 		
@@ -84,22 +83,22 @@ namespace MonoDevelop.CSharp.Dom
 			get { return GetChildrenByRole (CaseLabelRole).Cast<CaseLabel> (); }
 		}
 		
-		public IEnumerable<INode> Statements {
+		public IEnumerable<DomNode> Statements {
 			get {
 				var body = GetChildByRole (Roles.Body);
 				if (body is BlockStatement)
 					return ((BlockStatement)body).Statements;
-				return new INode[] { body };
+				return new DomNode[] { body };
 			}
 		}
 		
-		public override S AcceptVisitor<T, S> (ICSharpDomVisitor<T, S> visitor, T data)
+		public override S AcceptVisitor<T, S> (DomVisitor<T, S> visitor, T data)
 		{
 			return visitor.VisitSwitchSection (this, data);
 		}
 	}
 	
-	public class CaseLabel : AbstractCSharpNode
+	public class CaseLabel : DomNode
 	{
 		public override NodeType NodeType {
 			get {
@@ -107,11 +106,11 @@ namespace MonoDevelop.CSharp.Dom
 			}
 		}
 		
-		public INode Expression {
-			get { return GetChildByRole (Roles.Expression); }
+		public DomNode Expression {
+			get { return GetChildByRole (Roles.Expression) ?? DomNode.Null; }
 		}
 		
-		public override S AcceptVisitor<T, S> (ICSharpDomVisitor<T, S> visitor, T data)
+		public override S AcceptVisitor<T, S> (DomVisitor<T, S> visitor, T data)
 		{
 			return visitor.VisitCaseLabel (this, data);
 		}

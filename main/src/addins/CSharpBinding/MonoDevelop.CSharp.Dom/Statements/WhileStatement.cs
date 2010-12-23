@@ -24,12 +24,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System;
-using MonoDevelop.Projects.Dom;
-
 namespace MonoDevelop.CSharp.Dom
 {
-	public class WhileStatement : AbstractCSharpNode
+	public class WhileStatement : DomNode
 	{
 		public const int DoKeywordRole = 101;
 		public const int WhileKeywordRole = 102;
@@ -45,31 +42,31 @@ namespace MonoDevelop.CSharp.Dom
 			set;
 		}
 		
-		public ICSharpNode EmbeddedStatement {
-			get { return (ICSharpNode)GetChildByRole (Roles.EmbeddedStatement); }
+		public DomNode EmbeddedStatement {
+			get { return GetChildByRole (Roles.EmbeddedStatement) ?? DomNode.Null; }
 		}
 		
-		public INode Condition {
-			get { return GetChildByRole (Roles.Condition); }
+		public DomNode Condition {
+			get { return GetChildByRole (Roles.Condition) ?? DomNode.Null; }
 		}
 		
 		public CSharpTokenNode DoKeyword {
-			get { return (CSharpTokenNode)GetChildByRole (DoKeywordRole); }
+			get { return (CSharpTokenNode)GetChildByRole (DoKeywordRole) ?? CSharpTokenNode.Null; }
 		}
 		
 		public CSharpTokenNode WhileKeyword {
-			get { return (CSharpTokenNode)GetChildByRole (WhileKeywordRole); }
+			get { return (CSharpTokenNode)GetChildByRole (WhileKeywordRole) ?? CSharpTokenNode.Null; }
 		}
 		
 		public CSharpTokenNode LPar {
-			get { return (CSharpTokenNode)GetChildByRole (Roles.LPar); }
+			get { return (CSharpTokenNode)GetChildByRole (Roles.LPar) ?? CSharpTokenNode.Null; }
 		}
 		
 		public CSharpTokenNode RPar {
-			get { return (CSharpTokenNode)GetChildByRole (Roles.RPar); }
+			get { return (CSharpTokenNode)GetChildByRole (Roles.RPar) ?? CSharpTokenNode.Null; }
 		}
 		
-		public override S AcceptVisitor<T, S> (ICSharpDomVisitor<T, S> visitor, T data)
+		public override S AcceptVisitor<T, S> (DomVisitor<T, S> visitor, T data)
 		{
 			return visitor.VisitWhileStatement (this, data);
 		}

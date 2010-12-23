@@ -57,6 +57,9 @@ namespace Mono.TextEditor.Vi
 				case ViEditorMode.Insert:
 				case ViEditorMode.Replace:
 					return false;
+				case ViEditorMode.Normal:
+				case ViEditorMode.Visual:
+				case ViEditorMode.VisualLine:
 				default:
 					return true;
 				}
@@ -105,6 +108,7 @@ namespace Mono.TextEditor.Vi
 		StringBuilder commandBuffer = new StringBuilder ();
 		Dictionary<char,ViMark> marks = new Dictionary<char, ViMark>();
 		Dictionary<char,ViMacro> macros = new Dictionary<char, ViMacro>();
+		char macros_lastplayed = '@'; // start with the illegal macro character
 		string statusText = "";
 		
 		/// <summary>
@@ -825,16 +829,19 @@ namespace Mono.TextEditor.Vi
 			
 			case State.PlayMacro: {
 				char k = (char) unicodeKey;
+				if (k == '@') 
+					k = macros_lastplayed;
 				if (macros.ContainsKey(k)) {
 					Reset ("");
+					macros_lastplayed = k; // FIXME play nice when playing macros from inside macros?
 					ViMacro macroToPlay = macros [k];
 					foreach (ViMacro.KeySet keySet in macroToPlay.KeysPressed) {
-						HandleKeypress(keySet.Key, keySet.UnicodeKey, keySet.Modifiers);
+						HandleKeypress(keySet.Key, keySet.UnicodeKey, keySet.Modifiers); // FIXME stop on errors? essential with multipliers and nowrapscan
 					}
 					/* Once all the keys have been played back, quickly exit. */
 					return;
 				} else {
-					Reset ("Invalid Macro Name");
+					Reset ("Invalid Macro Name '" + k + "'");
 					return;
 				}
 			}

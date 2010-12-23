@@ -473,6 +473,62 @@ namespace MonoDevelop.SourceEditor
 			UpdatePinnedWatches ();
 			this.IsDirty = false;
 			UpdateTasks (null, null);
+			widget.TextEditor.VAdjustment.Changed += HandleTextEditorVAdjustmentChanged;
+		}
+		
+		void HandleTextEditorVAdjustmentChanged (object sender, EventArgs e)
+		{
+			widget.TextEditor.VAdjustment.Changed -= HandleTextEditorVAdjustmentChanged;
+			LoadSettings ();
+		}
+		
+		
+		class Settings
+		{
+			public int CaretOffset { get; set; }
+			public double vAdjustment { get; set; }
+			public double hAdjustment { get; set; }
+			
+			public Dictionary<int, bool> FoldingStates = new Dictionary<int, bool> ();
+			
+			public override string ToString ()
+			{
+				return string.Format ("[Settings: CaretOffset={0}, vAdjustment={1}, hAdjustment={2}]", CaretOffset, vAdjustment, hAdjustment);
+			}
+		}
+		
+		static Dictionary<string, Settings> settingStore = new Dictionary<string, Settings> ();
+		internal void LoadSettings ()
+		{
+			Settings settings;
+			if (string.IsNullOrEmpty (ContentName) || !settingStore.TryGetValue (ContentName, out settings))
+				return;
+			
+			widget.TextEditor.Caret.Offset = settings.CaretOffset;
+			widget.TextEditor.VAdjustment.Value = settings.vAdjustment;
+			widget.TextEditor.HAdjustment.Value = settings.hAdjustment;
+			
+			foreach (var f in widget.TextEditor.Document.FoldSegments) {
+				bool isFolded;
+				if (settings.FoldingStates.TryGetValue (f.Offset, out isFolded))
+					f.IsFolded = isFolded;
+			}
+		}
+		
+		void StoreSettings ()
+		{
+			Dictionary<int, bool> foldingStates = new Dictionary<int, bool> ();
+			foreach (var f in widget.TextEditor.Document.FoldSegments) {
+				foldingStates[f.Offset] = f.IsFolded;
+			}
+			if (string.IsNullOrEmpty (ContentName))
+				return;
+			settingStore[ContentName] = new Settings () {
+				CaretOffset = widget.TextEditor.Caret.Offset,
+				vAdjustment = widget.TextEditor.VAdjustment.Value,
+				hAdjustment = widget.TextEditor.HAdjustment.Value,
+				FoldingStates = foldingStates
+			};
 		}
 
 		bool warnOverwrite = false;
@@ -525,6 +581,8 @@ namespace MonoDevelop.SourceEditor
 		
 		public override void Dispose()
 		{
+			StoreSettings ();
+			
 			this.isDisposed= true;
 			Counters.LoadedEditors--;
 			
@@ -1575,7 +1633,7 @@ namespace MonoDevelop.SourceEditor
 					item.Description += line;
 				}
 				item.Category = GettextCatalog.GetString ("Clipboard ring");
-				item.Icon = DesktopService.GetPixbufForFile ("test.txt", Gtk.IconSize.Menu);
+				item.Icon = DesktopService.GetPixbufForFile ("a.txt", Gtk.IconSize.Menu);
 				item.Name = text.Length > 16 ? text.Substring (0, 16) + "..." : text;
 				item.Name = item.Name.Replace ("\t", "\\t");
 				item.Name = item.Name.Replace ("\n", "\\n");

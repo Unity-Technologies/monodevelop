@@ -24,12 +24,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System;
-using MonoDevelop.Projects.Dom;
-
 namespace MonoDevelop.CSharp.Dom
 {
-	public class StackAllocExpression : AbstractCSharpNode
+	public class StackAllocExpression : DomNode
 	{
 		public const int StackAllocKeywordRole = 100;
 		
@@ -41,33 +38,33 @@ namespace MonoDevelop.CSharp.Dom
 
 		public FullTypeName Type {
 			get {
-				return (FullTypeName)GetChildByRole (Roles.ReturnType);
+				return (FullTypeName)GetChildByRole (Roles.ReturnType) ?? FullTypeName.Null;
 			}
 		}
 		
-		public ICSharpNode CountExpression {
-			get { return (ICSharpNode)GetChildByRole (Roles.Expression); }
+		public DomNode CountExpression {
+			get { return GetChildByRole (Roles.Expression) ?? DomNode.Null; }
 		}
 		
 		public CSharpTokenNode StackAllocKeyword {
 			get {
-				return (CSharpTokenNode)GetChildByRole (StackAllocKeywordRole);
+				return (CSharpTokenNode)GetChildByRole (StackAllocKeywordRole) ?? CSharpTokenNode.Null;
 			}
 		}
 		
 		public CSharpTokenNode LBracket {
 			get {
-				return (CSharpTokenNode)GetChildByRole (Roles.LBracket);
+				return (CSharpTokenNode)GetChildByRole (Roles.LBracket) ?? CSharpTokenNode.Null;
 			}
 		}
 		
 		public CSharpTokenNode RBracket {
 			get {
-				return (CSharpTokenNode)GetChildByRole (Roles.RBracket);
+				return (CSharpTokenNode)GetChildByRole (Roles.RBracket) ?? CSharpTokenNode.Null;
 			}
 		}
 		
-		public override S AcceptVisitor<T, S> (ICSharpDomVisitor<T, S> visitor, T data)
+		public override S AcceptVisitor<T, S> (DomVisitor<T, S> visitor, T data)
 		{
 			return visitor.VisitStackAllocExpression (this, data);
 		}

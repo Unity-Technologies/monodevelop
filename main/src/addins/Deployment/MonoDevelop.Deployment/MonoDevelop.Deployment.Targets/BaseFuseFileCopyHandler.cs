@@ -29,6 +29,7 @@ using System.IO;
 using mun = Mono.Unix.Native;
 
 using MonoDevelop.Core;
+using MonoDevelop.Core.ProgressMonitoring;
 
 namespace MonoDevelop.Deployment.Targets
 {
@@ -54,7 +55,7 @@ namespace MonoDevelop.Deployment.Targets
 			}
 			
 			try {
-				MountTempDirectory (copyConfig, tempDir.FullName);
+				MountTempDirectory (monitor, copyConfig, tempDir.FullName);
 			} catch (Exception e) {
 				monitor.ReportError (GettextCatalog.GetString ("Could not mount FUSE filesystem."), e);
 				RemoveTempDirIfEmpty (tempDir);
@@ -64,10 +65,21 @@ namespace MonoDevelop.Deployment.Targets
 			try {
 				base.InternalCopyFiles (monitor, replacePolicy, copyConfig, deployFiles, context, tempDir.FullName);
 			} finally {
+				//unmount the filesystem
 				try {
-					//unmount the fuse directory
-					RunFuseCommand ("fusermount", string.Format ("-u \"{0}\"", tempDir.FullName));
+					string escapedDir = tempDir.FullName.Replace ("\"", "\\\"");
+					string cmd, args;
+					
+					if (PropertyService.IsMac) {
+						cmd = "umount";
+						args = string.Format ("\"{0}\"", escapedDir);
+					} else {
+						cmd = "fusermount";
+						args = string.Format ("-u \"{0}\"", escapedDir);
+					}
+					RunFuseCommand (monitor, cmd, args);
 				} catch (Exception e) {
+					LoggingService.LogError (GettextCatalog.GetString ("Could not unmount FUSE filesystem."), e);
 					monitor.ReportError (GettextCatalog.GetString ("Could not unmount FUSE filesystem."), e);
 				}
 				RemoveTempDirIfEmpty (tempDir);
@@ -81,15 +93,24 @@ namespace MonoDevelop.Deployment.Targets
 				tempDir.Delete ();
 		}
 		
-		public abstract void MountTempDirectory (FileCopyConfiguration copyConfig, string tempPath);
+		public abstract void MountTempDirectory (IProgressMonitor monitor, FileCopyConfiguration copyConfig, string tempPath);
 		
-		protected void RunFuseCommand (string name, string args)
+		protected void RunFuseCommand (IProgressMonitor monitor, string command, string args)
 		{
-			MonoDevelop.Core.Execution.ProcessWrapper pWrapper = MonoDevelop.Core.Runtime.ProcessService.StartProcess (name, args, null, null);
-			pWrapper.WaitForExit ();
-			if (pWrapper.ExitCode != 0) {
-				LoggingService.LogWarning ("Failed to run {0} {1}", name, args);
-				throw new Exception (pWrapper.StandardError.ReadToEnd ());
+			LoggingService.LogInfo ("Running FUSE command: {0} {1}", command, args);
+			var log = new StringWriter ();
+			var psi = new System.Diagnostics.ProcessStartInfo (command, args) {
+				RedirectStandardError = true,
+				RedirectStandardOutput = true,
+				UseShellExecute = false,
+			};
+			using (var opMon = new AggregatedOperationMonitor (monitor)) {
+				using (var pWrapper = MonoDevelop.Core.Runtime.ProcessService.StartProcess (psi, log, log, null)) {
+					opMon.AddOperation (pWrapper);
+					pWrapper.WaitForOutput ();
+					if (pWrapper.ExitCode != 0)
+						throw new Exception (log.ToString ());
+				}
 			}
 		}
 

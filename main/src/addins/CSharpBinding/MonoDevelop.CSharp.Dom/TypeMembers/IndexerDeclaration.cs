@@ -24,35 +24,33 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System;
-using System.Linq;
-using MonoDevelop.Projects.Dom;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace MonoDevelop.CSharp.Dom
 {
 	public class IndexerDeclaration : PropertyDeclaration
 	{
-		public IEnumerable<ParameterDeclarationExpression> Arguments { 
+		public IEnumerable<ParameterDeclaration> Parameters { 
 			get {
-				return base.GetChildrenByRole (Roles.Argument).Cast <ParameterDeclarationExpression>();
+				return base.GetChildrenByRole (Roles.Parameter).Cast <ParameterDeclaration>();
 			}
 		}
 		
 		public CSharpTokenNode LBracket {
 			get {
-				return (CSharpTokenNode)GetChildByRole (Roles.LBracket);
+				return (CSharpTokenNode)GetChildByRole (Roles.LBracket) ?? CSharpTokenNode.Null;
 			}
 		}
 		
 		public CSharpTokenNode RBracket {
 			get {
-				return (CSharpTokenNode)GetChildByRole (Roles.RBracket);
+				return (CSharpTokenNode)GetChildByRole (Roles.RBracket) ?? CSharpTokenNode.Null;
 			}
 		}
 		
 		
-		public override S AcceptVisitor<T, S> (ICSharpDomVisitor<T, S> visitor, T data)
+		public override S AcceptVisitor<T, S> (DomVisitor<T, S> visitor, T data)
 		{
 			return visitor.VisitIndexerDeclaration (this, data);
 		}

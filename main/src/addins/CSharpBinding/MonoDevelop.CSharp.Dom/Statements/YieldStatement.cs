@@ -24,12 +24,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System;
-using MonoDevelop.Projects.Dom;
-
 namespace MonoDevelop.CSharp.Dom
 {
-	public class YieldStatement : AbstractCSharpNode
+	public class YieldStatement : DomNode
 	{
 		public const int YieldKeywordRole = 100;
 		public const int ReturnKeywordRole = 101;
@@ -41,11 +38,11 @@ namespace MonoDevelop.CSharp.Dom
 			}
 		}
 
-		public INode Expression {
-			get { return GetChildByRole (Roles.Expression); }
+		public DomNode Expression {
+			get { return GetChildByRole (Roles.Expression) ?? DomNode.Null; }
 		}
 		
-		public override S AcceptVisitor<T, S> (ICSharpDomVisitor<T, S> visitor, T data)
+		public override S AcceptVisitor<T, S> (DomVisitor<T, S> visitor, T data)
 		{
 			return visitor.VisitYieldStatement (this, data);
 		}

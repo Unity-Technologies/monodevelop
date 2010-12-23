@@ -24,12 +24,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System;
-using MonoDevelop.Projects.Dom;
-
 namespace MonoDevelop.CSharp.Dom
 {
-	public class FixedStatement : AbstractCSharpNode
+	public class FixedStatement : DomNode
 	{
 		public const int PointerDeclarationRole = 100;
 		public const int FixedKeywordRole = 101;
@@ -41,15 +38,15 @@ namespace MonoDevelop.CSharp.Dom
 			}
 		}
 
-		public ICSharpNode EmbeddedStatement {
-			get { return (ICSharpNode)GetChildByRole (Roles.EmbeddedStatement); }
+		public DomNode EmbeddedStatement {
+			get { return GetChildByRole (Roles.EmbeddedStatement) ?? DomNode.Null; }
 		}
 		
-		public INode PointerDeclaration {
-			get { return GetChildByRole (PointerDeclarationRole); }
+		public DomNode PointerDeclaration {
+			get { return GetChildByRole (PointerDeclarationRole) ?? DomNode.Null; }
 		}
 		
-		public override S AcceptVisitor<T, S> (ICSharpDomVisitor<T, S> visitor, T data)
+		public override S AcceptVisitor<T, S> (DomVisitor<T, S> visitor, T data)
 		{
 			return visitor.VisitFixedStatement (this, data);
 		}

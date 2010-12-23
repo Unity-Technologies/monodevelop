@@ -1,5 +1,5 @@
 // 
-// ParameterDeclarationExpression.cs
+// ArrayInitializerExpression.cs
 //  
 // Author:
 //       Mike Krüger <mkrueger@novell.com>
@@ -23,47 +23,21 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-using System;
 
 namespace MonoDevelop.CSharp.Dom
-{
-	
-	public enum ParameterModifier {
-		None,
-		Ref,
-		Out,
-		Params,
-		This
-	}
-	
-	public class ParameterDeclarationExpression : AbstractCSharpNode
+{ 
+	public class ArrayInitializerExpression : DomNode
 	{
 		public override NodeType NodeType {
 			get {
-				return NodeType.Unknown;
+				return NodeType.Expression;
 			}
 		}
 		
-		public ParameterModifier ParameterModifier {
-			get;
-			set;
-		}
 		
-		public Identifier Identifier {
-			get {
-				return (Identifier)GetChildByRole (Roles.Identifier);
-			}
-		}
-		
-		public ICSharpNode DefaultExpression {
-			get {
-				return (ICSharpNode)GetChildByRole (Roles.Expression);
-			}
-		}
-		
-		public override S AcceptVisitor<T, S> (ICSharpDomVisitor<T, S> visitor, T data)
+		public override S AcceptVisitor<T, S> (DomVisitor<T, S> visitor, T data)
 		{
-			return visitor.VisitParameterDeclarationExpression (this, data);
+			return visitor.VisitArrayInitializerExpression (this, data);
 		}
 	}
 }

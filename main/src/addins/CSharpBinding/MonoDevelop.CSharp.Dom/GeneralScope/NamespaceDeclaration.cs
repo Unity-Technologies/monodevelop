@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 // 
 // NamespaceDeclaration.cs
 //  
@@ -24,12 +25,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System;
-using MonoDevelop.Projects.Dom;
-
 namespace MonoDevelop.CSharp.Dom
 {
-	public class NamespaceDeclaration : AbstractCSharpNode
+	public class NamespaceDeclaration : DomNode
 	{
 		public override NodeType NodeType {
 			get {
@@ -54,13 +52,13 @@ namespace MonoDevelop.CSharp.Dom
 		
 		public CSharpTokenNode LBrace {
 			get {
-				return (CSharpTokenNode)GetChildByRole (Roles.LBrace);
+				return (CSharpTokenNode)GetChildByRole (Roles.LBrace) ?? CSharpTokenNode.Null;
 			}
 		}
 		
 		public CSharpTokenNode RBrace {
 			get {
-				return (CSharpTokenNode)GetChildByRole (Roles.RBrace);
+				return (CSharpTokenNode)GetChildByRole (Roles.RBrace) ?? CSharpTokenNode.Null;
 			}
 		}
 		
@@ -70,16 +68,21 @@ namespace MonoDevelop.CSharp.Dom
 			}
 		}
 		
+		public IEnumerable<DomNode> Members {
+			get { return GetChildrenByRole(Roles.Member); }
+		}
+		
 		public static string BuildQualifiedName (string name1, string name2)
 		{
 			if (string.IsNullOrEmpty (name1))
-				return name1;
-			if (string.IsNullOrEmpty (name2))
 				return name2;
+			if (string.IsNullOrEmpty (name2))
+				return name1;
 			return name1 + "." + name2;
 		}
 		
-		public override S AcceptVisitor<T, S> (ICSharpDomVisitor<T, S> visitor, T data)
+		
+		public override S AcceptVisitor<T, S> (DomVisitor<T, S> visitor, T data)
 		{
 			return visitor.VisitNamespaceDeclaration (this, data);
 		}

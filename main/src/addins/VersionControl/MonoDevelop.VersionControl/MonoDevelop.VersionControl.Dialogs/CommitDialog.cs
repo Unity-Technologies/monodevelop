@@ -86,7 +86,7 @@ namespace MonoDevelop.VersionControl.Dialogs
 				selected.Add (info.LocalPath);
 			}
 			
-			if (changeSet.GlobalComment.Length == 0) {
+			if (string.IsNullOrEmpty (changeSet.GlobalComment)) {
 				AuthorInformation aInfo;
 				CommitMessageFormat fmt = VersionControlService.GetCommitMessageFormat (changeSet, out aInfo);
 				Message = changeSet.GenerateGlobalComment (fmt, aInfo);
@@ -137,7 +137,7 @@ namespace MonoDevelop.VersionControl.Dialogs
 						MessageService.ShowException (ex);
 						res = false;
 					}
-					
+					System.Console.WriteLine ("RES: " + res);
 					if (!res) {
 						// Commit failed. Rollback the previous extensions
 						for (int m=0; m<n; m++) {

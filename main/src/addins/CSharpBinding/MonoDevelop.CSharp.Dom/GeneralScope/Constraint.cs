@@ -24,14 +24,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System;
-using System.Linq;
-using MonoDevelop.Projects.Dom;
 using System.Collections.Generic;
 
 namespace MonoDevelop.CSharp.Dom
 {
-	public class Constraint : AbstractCSharpNode
+	public class Constraint : DomNode
 	{
 		
 		public override NodeType NodeType {
@@ -41,22 +38,22 @@ namespace MonoDevelop.CSharp.Dom
 		}
 		
 		public CSharpTokenNode WhereKeyword {
-			get { return (CSharpTokenNode)GetChildByRole (Roles.Keyword); }
+			get { return (CSharpTokenNode)GetChildByRole (Roles.Keyword) ?? CSharpTokenNode.Null; }
 		}
 		
 		public Identifier TypeParameter {
-			get { return (Identifier)GetChildByRole (Roles.Identifier); }
+			get { return (Identifier)GetChildByRole (Roles.Identifier) ?? Identifier.Null; }
 		}
 		
 		public CSharpTokenNode Colon {
-			get { return (CSharpTokenNode)GetChildByRole (Roles.Colon); }
+			get { return (CSharpTokenNode)GetChildByRole (Roles.Colon) ?? CSharpTokenNode.Null; }
 		}
 		
-		public IEnumerable<ICSharpNode> TypeArguments {
-			get { return GetChildrenByRole (Roles.TypeArgument).Cast<ICSharpNode> (); }
+		public IEnumerable<DomNode> TypeParameters {
+			get { return GetChildrenByRole (Roles.TypeParameter); }
 		}
 		
-		public override S AcceptVisitor<T, S> (ICSharpDomVisitor<T, S> visitor, T data)
+		public override S AcceptVisitor<T, S> (DomVisitor<T, S> visitor, T data)
 		{
 			return visitor.VisitConstraint (this, data);
 		}

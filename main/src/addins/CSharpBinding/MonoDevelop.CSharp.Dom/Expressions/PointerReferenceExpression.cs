@@ -24,11 +24,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System;
-using System.Linq;
-using MonoDevelop.Projects.Dom;
-using System.Collections.Generic;
-
 namespace MonoDevelop.CSharp.Dom
 {
 	/// <summary>
@@ -42,8 +37,8 @@ namespace MonoDevelop.CSharp.Dom
 			}
 		}
 
-		public INode Expression {
-			get { return GetChildByRole (Roles.TargetExpression); }
+		public DomNode Expression {
+			get { return GetChildByRole (Roles.TargetExpression) ?? DomNode.Null; }
 		}
 		
 		public string Dim {
@@ -51,7 +46,7 @@ namespace MonoDevelop.CSharp.Dom
 			set;
 		}
 		
-		public override S AcceptVisitor<T, S> (ICSharpDomVisitor<T, S> visitor, T data)
+		public override S AcceptVisitor<T, S> (DomVisitor<T, S> visitor, T data)
 		{
 			return visitor.VisitPointerReferenceExpression (this, data);
 		}

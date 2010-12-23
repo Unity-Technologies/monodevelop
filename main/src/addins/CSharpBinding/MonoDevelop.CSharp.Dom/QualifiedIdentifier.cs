@@ -27,11 +27,19 @@
 using System;
 using System.Text;
 using MonoDevelop.Projects.Dom;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace MonoDevelop.CSharp.Dom
 {
-	public class QualifiedIdentifier : AbstractNode
+	public class QualifiedIdentifier : DomNode
 	{
+		public override NodeType NodeType {
+			get {
+				return NodeType.Unknown;
+			}
+		}
+		
 		public string QualifiedName {
 			get {
 				StringBuilder builder = new StringBuilder ();
@@ -44,8 +52,23 @@ namespace MonoDevelop.CSharp.Dom
 			}
 		}
 		
+		public IEnumerable<Identifier> NameParts {
+			get { 
+				return GetChildrenByRole (Roles.Identifier).Cast<Identifier>();
+			}
+		}
+		
+		public bool HasDoubleColon {
+			get { return false; } // TODO
+		}
+		
 		public QualifiedIdentifier ()
 		{
+		}
+		
+		public override S AcceptVisitor<T, S> (DomVisitor<T, S> visitor, T data)
+		{
+			return default (S);
 		}
 	}
 }

@@ -44,16 +44,17 @@ FILES =  \
 	MonoDevelop.CSharp.Completion/NRefactoryIndexerParameterDataProvider.cs \
 	MonoDevelop.CSharp.Completion/NRefactoryParameterDataProvider.cs \
 	MonoDevelop.CSharp.Completion/NRefactoryTemplateParameterDataProvider.cs \
-	MonoDevelop.CSharp.Dom/AbstractCSharpNode.cs \
-	MonoDevelop.CSharp.Dom/AbtractCSharpDomVisitor.cs \
 	MonoDevelop.CSharp.Dom/CompilationUnit.cs \
 	MonoDevelop.CSharp.Dom/ComposedType.cs \
 	MonoDevelop.CSharp.Dom/CSharpAmbience.cs \
 	MonoDevelop.CSharp.Dom/CSharpModifierToken.cs \
 	MonoDevelop.CSharp.Dom/CSharpTokenNode.cs \
+	MonoDevelop.CSharp.Dom/DomNode.cs \
+	MonoDevelop.CSharp.Dom/DomVisitor.cs \
 	MonoDevelop.CSharp.Dom/Expressions/AnonymousMethodExpression.cs \
 	MonoDevelop.CSharp.Dom/Expressions/ArgListExpression.cs \
-	MonoDevelop.CSharp.Dom/Expressions/ArrayObjectCreateExpression.cs \
+	MonoDevelop.CSharp.Dom/Expressions/ArrayCreateExpression.cs \
+	MonoDevelop.CSharp.Dom/Expressions/ArrayInitializerExpression.cs \
 	MonoDevelop.CSharp.Dom/Expressions/AsExpression.cs \
 	MonoDevelop.CSharp.Dom/Expressions/AssignmentExpression.cs \
 	MonoDevelop.CSharp.Dom/Expressions/BaseReferenceExpression.cs \
@@ -84,16 +85,15 @@ FILES =  \
 	MonoDevelop.CSharp.Dom/FullTypeName.cs \
 	MonoDevelop.CSharp.Dom/GeneralScope/Attribute.cs \
 	MonoDevelop.CSharp.Dom/GeneralScope/AttributeSection.cs \
+	MonoDevelop.CSharp.Dom/GeneralScope/Comment.cs \
 	MonoDevelop.CSharp.Dom/GeneralScope/Constraint.cs \
 	MonoDevelop.CSharp.Dom/GeneralScope/DelegateDeclaration.cs \
-	MonoDevelop.CSharp.Dom/GeneralScope/EnumDeclaration.cs \
 	MonoDevelop.CSharp.Dom/GeneralScope/NamespaceDeclaration.cs \
 	MonoDevelop.CSharp.Dom/GeneralScope/TypeDeclaration.cs \
 	MonoDevelop.CSharp.Dom/GeneralScope/UsingAliasDeclaration.cs \
 	MonoDevelop.CSharp.Dom/GeneralScope/UsingDeclaration.cs \
-	MonoDevelop.CSharp.Dom/ICSharpDomVisitor.cs \
-	MonoDevelop.CSharp.Dom/ICSharpNode.cs \
 	MonoDevelop.CSharp.Dom/Identifier.cs \
+	MonoDevelop.CSharp.Dom/NodeType.cs \
 	MonoDevelop.CSharp.Dom/QualifiedIdentifier.cs \
 	MonoDevelop.CSharp.Dom/Statements/BlockStatement.cs \
 	MonoDevelop.CSharp.Dom/Statements/BreakStatement.cs \
@@ -120,14 +120,16 @@ FILES =  \
 	MonoDevelop.CSharp.Dom/Statements/YieldStatement.cs \
 	MonoDevelop.CSharp.Dom/TypeMembers/AbstractMember.cs \
 	MonoDevelop.CSharp.Dom/TypeMembers/AbstractMemberBase.cs \
+	MonoDevelop.CSharp.Dom/TypeMembers/Accessor.cs \
 	MonoDevelop.CSharp.Dom/TypeMembers/ConstructorDeclaration.cs \
 	MonoDevelop.CSharp.Dom/TypeMembers/DestructorDeclaration.cs \
+	MonoDevelop.CSharp.Dom/TypeMembers/EnumMemberDeclaration.cs \
 	MonoDevelop.CSharp.Dom/TypeMembers/EventDeclaration.cs \
 	MonoDevelop.CSharp.Dom/TypeMembers/FieldDeclaration.cs \
 	MonoDevelop.CSharp.Dom/TypeMembers/IndexerDeclaration.cs \
 	MonoDevelop.CSharp.Dom/TypeMembers/MethodDeclaration.cs \
 	MonoDevelop.CSharp.Dom/TypeMembers/OperatorDeclaration.cs \
-	MonoDevelop.CSharp.Dom/TypeMembers/ParameterDeclarationExpression.cs \
+	MonoDevelop.CSharp.Dom/TypeMembers/ParameterDeclaration.cs \
 	MonoDevelop.CSharp.Dom/TypeMembers/PropertyDeclaration.cs \
 	MonoDevelop.CSharp.Dom/TypeMembers/VariableInitializer.cs \
 	MonoDevelop.CSharp.Formatting/CSharpFormatter.cs \
@@ -152,6 +154,7 @@ FILES =  \
 	MonoDevelop.CSharp.Parser/CSharpParser.cs \
 	MonoDevelop.CSharp.Parser/mcs/anonymous.cs \
 	MonoDevelop.CSharp.Parser/mcs/argument.cs \
+	MonoDevelop.CSharp.Parser/mcs/assembly.cs \
 	MonoDevelop.CSharp.Parser/mcs/assign.cs \
 	MonoDevelop.CSharp.Parser/mcs/attribute.cs \
 	MonoDevelop.CSharp.Parser/mcs/cfold.cs \

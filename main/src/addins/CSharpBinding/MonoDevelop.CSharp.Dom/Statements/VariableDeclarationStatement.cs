@@ -24,27 +24,38 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System;
+using System.Collections.Generic;
 using System.Linq;
 using MonoDevelop.Projects.Dom;
-using System.Collections.Generic;
 
 namespace MonoDevelop.CSharp.Dom
 {
-	public class VariableDeclarationStatement : AbstractCSharpNode
+	public class VariableDeclarationStatement : DomNode
 	{
 		public override NodeType NodeType {
 			get {
 				return NodeType.Statement;
 			}
 		}
-
-		public IEnumerable<INode> Modifiers {
-			get { return base.GetChildrenByRole (Roles.Modifier); }
+		
+		public IEnumerable<CSharpModifierToken> ModifierTokens {
+			get {
+				return base.GetChildrenByRole (Roles.Modifier).Cast <CSharpModifierToken>();
+			}
 		}
 		
-		public ICSharpNode ReturnType {
-			get { return (ICSharpNode)GetChildByRole (Roles.ReturnType); }
+		public Modifiers Modifiers {
+			get {
+				Modifiers m = 0;
+				foreach (CSharpModifierToken t in this.ModifierTokens) {
+					m |= t.Modifier;
+				}
+				return m;
+			}
+		}
+		
+		public DomNode ReturnType {
+			get { return GetChildByRole (Roles.ReturnType) ?? DomNode.Null; }
 		}
 		
 		public IEnumerable<VariableInitializer> Variables {
@@ -52,10 +63,10 @@ namespace MonoDevelop.CSharp.Dom
 		}
 		
 		public CSharpTokenNode Semicolon {
-			get { return (CSharpTokenNode)GetChildByRole (Roles.Semicolon); }
+			get { return (CSharpTokenNode)GetChildByRole (Roles.Semicolon) ?? CSharpTokenNode.Null; }
 		}
 		
-		public override S AcceptVisitor<T, S> (ICSharpDomVisitor<T, S> visitor, T data)
+		public override S AcceptVisitor<T, S> (DomVisitor<T, S> visitor, T data)
 		{
 			return visitor.VisitVariableDeclarationStatement (this, data);
 		}

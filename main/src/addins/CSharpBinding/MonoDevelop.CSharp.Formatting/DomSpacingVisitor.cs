@@ -35,7 +35,7 @@ using System.Linq;
 
 namespace MonoDevelop.CSharp.Formatting
 {
-	public class DomSpacingVisitor : AbtractCSharpDomVisitor<object, object>
+	public class DomSpacingVisitor : DomVisitor<object, object>
 	{
 		CSharpFormattingPolicy policy;
 		TextEditorData data;
@@ -175,7 +175,7 @@ namespace MonoDevelop.CSharp.Formatting
 			return base.VisitCastExpression (castExpression, data);
 		}
 		
-		void ForceSpacesAround (INode node, bool forceSpaces)
+		void ForceSpacesAround (DomNode node, bool forceSpaces)
 		{
 			ForceSpacesBefore (node, forceSpaces);
 			ForceSpacesAfter (node, forceSpaces);
@@ -186,9 +186,8 @@ namespace MonoDevelop.CSharp.Formatting
 			return ch == ' ' || ch == '\t';
 		}
 
-		void ForceSpacesAfter (INode node, bool forceSpaces)
+		void ForceSpacesAfter (DomNode n, bool forceSpaces)
 		{
-			var n = node as ICSharpNode;
 			if (n == null)
 				return;
 			DomLocation location = n.EndLocation;
@@ -200,9 +199,8 @@ namespace MonoDevelop.CSharp.Formatting
 			ForceSpace (offset - 1, i, forceSpaces);
 		}
 		
-		int ForceSpacesBefore (INode node, bool forceSpaces)
+		int ForceSpacesBefore (DomNode n, bool forceSpaces)
 		{
-			var n = node as ICSharpNode;
 			if (n == null)
 				return 0;
 			DomLocation location = n.StartLocation;
@@ -217,9 +215,9 @@ namespace MonoDevelop.CSharp.Formatting
 			return i;
 		}
 		
-		void FormatCommas (AbstractNode parent, bool before, bool after)
+		void FormatCommas (DomNode parent, bool before, bool after)
 		{
-			if (parent == null)
+			if (parent.IsNull)
 				return;
 			foreach (CSharpTokenNode comma in parent.Children.Where (node => node.Role == FieldDeclaration.Roles.Comma)) {
 				ForceSpacesAfter (comma, after);
@@ -245,7 +243,7 @@ namespace MonoDevelop.CSharp.Formatting
 		public override object VisitDelegateDeclaration (DelegateDeclaration delegateDeclaration, object data)
 		{
 			ForceSpacesBefore (delegateDeclaration.LPar, policy.BeforeDelegateDeclarationParentheses);
-			if (delegateDeclaration.Arguments.Any ()) {
+			if (delegateDeclaration.Parameters.Any ()) {
 				ForceSpacesAfter (delegateDeclaration.LPar, policy.WithinDelegateDeclarationParentheses);
 				ForceSpacesBefore (delegateDeclaration.RPar, policy.WithinDelegateDeclarationParentheses);
 			} else {
@@ -260,7 +258,7 @@ namespace MonoDevelop.CSharp.Formatting
 		public override object VisitMethodDeclaration (MethodDeclaration methodDeclaration, object data)
 		{
 			ForceSpacesBefore (methodDeclaration.LPar, policy.BeforeMethodDeclarationParentheses);
-			if (methodDeclaration.Arguments.Any ()) {
+			if (methodDeclaration.Parameters.Any ()) {
 				ForceSpacesAfter (methodDeclaration.LPar, policy.WithinMethodDeclarationParentheses);
 				ForceSpacesBefore (methodDeclaration.RPar, policy.WithinMethodDeclarationParentheses);
 			} else {
@@ -275,7 +273,7 @@ namespace MonoDevelop.CSharp.Formatting
 		public override object VisitConstructorDeclaration (ConstructorDeclaration constructorDeclaration, object data)
 		{
 			ForceSpacesBefore (constructorDeclaration.LPar, policy.BeforeConstructorDeclarationParentheses);
-			if (constructorDeclaration.Arguments.Any ()) {
+			if (constructorDeclaration.Parameters.Any ()) {
 				ForceSpacesAfter (constructorDeclaration.LPar, policy.WithinConstructorDeclarationParentheses);
 				ForceSpacesBefore (constructorDeclaration.RPar, policy.WithinConstructorDeclarationParentheses);
 			} else {
@@ -412,9 +410,9 @@ namespace MonoDevelop.CSharp.Formatting
 		
 		public override object VisitVariableInitializer (VariableInitializer variableInitializer, object data)
 		{
-			if (variableInitializer.Assign != null)
+			if (!variableInitializer.Assign.IsNull)
 				ForceSpacesAround (variableInitializer.Assign, policy.AroundAssignmentParentheses);
-			if (variableInitializer.Initializer != null)
+			if (!variableInitializer.Initializer.IsNull)
 				variableInitializer.Initializer.AcceptVisitor (this, data);
 			return data;
 		}
@@ -476,7 +474,7 @@ namespace MonoDevelop.CSharp.Formatting
 		
 		public override object VisitForStatement (ForStatement forStatement, object data)
 		{
-			foreach (INode node in forStatement.Children) {
+			foreach (DomNode node in forStatement.Children) {
 				if (node.Role == ForStatement.Roles.Semicolon) {
 					if (node.NextSibling is CSharpTokenNode || node.NextSibling is EmptyStatement)
 						continue;
@@ -593,10 +591,10 @@ namespace MonoDevelop.CSharp.Formatting
 			return base.VisitObjectCreateExpression (objectCreateExpression, data);
 		}
 		
-		public override object VisitArrayObjectCreateExpression (ArrayObjectCreateExpression arrayObjectCreateExpression, object data)
+		public override object VisitArrayCreateExpression (ArrayCreateExpression arrayObjectCreateExpression, object data)
 		{
 			FormatCommas (arrayObjectCreateExpression, policy.BeforeMethodCallParameterComma, policy.AfterMethodCallParameterComma);
-			return base.VisitArrayObjectCreateExpression (arrayObjectCreateExpression, data);
+			return base.VisitArrayCreateExpression (arrayObjectCreateExpression, data);
 		}
 		
 		public override object VisitLambdaExpression (LambdaExpression lambdaExpression, object data)

@@ -24,12 +24,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System;
 using MonoDevelop.Projects.Dom;
 
 namespace MonoDevelop.CSharp.Dom
 {
-	public class PrimitiveExpression : AbstractCSharpNode
+	public class PrimitiveExpression : DomNode
 	{
 		public override NodeType NodeType {
 			get {
@@ -64,7 +63,7 @@ namespace MonoDevelop.CSharp.Dom
 		}
 		
 		
-		public override S AcceptVisitor<T, S> (ICSharpDomVisitor<T, S> visitor, T data)
+		public override S AcceptVisitor<T, S> (DomVisitor<T, S> visitor, T data)
 		{
 			return visitor.VisitPrimitiveExpression (this, data);
 		}

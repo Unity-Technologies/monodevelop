@@ -24,14 +24,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System;
-using System.Linq;
-using MonoDevelop.Projects.Dom;
 using System.Collections.Generic;
 
 namespace MonoDevelop.CSharp.Dom
 {
-	public class MemberReferenceExpression : AbstractCSharpNode
+	public class MemberReferenceExpression : DomNode
 	{
 		public override NodeType NodeType {
 			get {
@@ -39,21 +36,27 @@ namespace MonoDevelop.CSharp.Dom
 			}
 		}
 
-		public INode Target {
-			get { return GetChildByRole (Roles.TargetExpression); }
+		public DomNode Target {
+			get { return GetChildByRole (Roles.TargetExpression) ?? DomNode.Null; }
 		}
 		
 		public Identifier Identifier {
 			get {
-				return (Identifier)GetChildByRole (Roles.Identifier);
+				return (Identifier)GetChildByRole (Roles.Identifier) ?? Identifier.Null;
 			}
 		}
 		
-		public IEnumerable<ICSharpNode> TypeArguments {
-			get { return GetChildrenByRole (Roles.TypeArgument).Cast<ICSharpNode> (); }
+		public string MemberName {
+			get {
+				return this.Identifier.Name;
+			}
 		}
 		
-		public override S AcceptVisitor<T, S> (ICSharpDomVisitor<T, S> visitor, T data)
+		public IEnumerable<DomNode> TypeArguments {
+			get { return GetChildrenByRole (Roles.TypeParameter); }
+		}
+		
+		public override S AcceptVisitor<T, S> (DomVisitor<T, S> visitor, T data)
 		{
 			return visitor.VisitMemberReferenceExpression (this, data);
 		}
