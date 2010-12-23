@@ -24,14 +24,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System;
+using System.Collections.Generic;
 using System.Linq;
 using MonoDevelop.Projects.Dom;
-using System.Collections.Generic;
 
 namespace MonoDevelop.CSharp.Dom
 {
-	public abstract class AbstractMemberBase : AbstractCSharpNode
+	public abstract class AbstractMemberBase : DomNode
 	{
 		public override NodeType NodeType {
 			get {
@@ -39,9 +38,19 @@ namespace MonoDevelop.CSharp.Dom
 			}
 		}
 
-		public IEnumerable<INode> Modifiers { 
+		public IEnumerable<CSharpModifierToken> ModifierTokens {
 			get {
-				return base.GetChildrenByRole (Roles.Modifier);
+				return base.GetChildrenByRole (Roles.Modifier).Cast <CSharpModifierToken>();
+			}
+		}
+		
+		public Modifiers Modifiers {
+			get {
+				Modifiers m = 0;
+				foreach (CSharpModifierToken t in this.ModifierTokens) {
+					m |= t.Modifier;
+				}
+				return m;
 			}
 		}
 		

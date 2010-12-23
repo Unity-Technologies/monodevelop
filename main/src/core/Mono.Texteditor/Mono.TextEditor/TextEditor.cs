@@ -939,10 +939,6 @@ namespace Mono.TextEditor
 					textEditorData.DeleteSelection (selection);
 					Caret.PreserveSelection = false;
 
-					if (this.textEditorData.IsSomethingSelected && selection.GetSelectionRange (textEditorData).Offset <= this.textEditorData.SelectionRange.Offset) {
-						this.textEditorData.SelectionRange = new Segment (this.textEditorData.SelectionRange.Offset - selection.GetSelectionRange (textEditorData).Length, this.textEditorData.SelectionRange.Length);
-						this.textEditorData.SelectionMode = selection.SelectionMode;
-					}
 					selection = null;
 				}
 			}
@@ -963,6 +959,7 @@ namespace Mono.TextEditor
 				dragOver = false;
 				context = null;
 			}
+			mouseButtonPressed = 0;
 			textEditorData.Document.EndAtomicUndo ();
 			base.OnDragDataReceived (context, x, y, selection_data, info, time_);
 		}
@@ -1008,12 +1005,12 @@ namespace Mono.TextEditor
 				dragContents = new ClipboardActions.CopyOperation ();
 				dragContents.CopyData (textEditorData);
 				DragContext context = Gtk.Drag.Begin (this, ClipboardActions.CopyOperation.targetList, DragAction.Move | DragAction.Copy, 1, e);
-				CodeSegmentPreviewWindow window = new CodeSegmentPreviewWindow (this, true, textEditorData.SelectionRange, 300, 300);
-
-				Gtk.Drag.SetIconWidget (context, window, 0, 0);
+				if (!Platform.IsMac) {
+					CodeSegmentPreviewWindow window = new CodeSegmentPreviewWindow (this, true, textEditorData.SelectionRange, 300, 300);
+					Gtk.Drag.SetIconWidget (context, window, 0, 0);
+				}
 				selection = Selection.Clone (MainSelection);
 				textViewMargin.inDrag = false;
-				
 			} else {
 				FireMotionEvent (x, y, mod);
 				if (mouseButtonPressed != 0) {

@@ -1,5 +1,5 @@
 // 
-// ICSharpDomVisitor.cs
+// DomVisitor.cs
 //  
 // Author:
 //       Mike Krüger <mkrueger@novell.com>
@@ -28,14 +28,14 @@ using System;
 
 namespace MonoDevelop.CSharp.Dom
 {
-	public abstract class AbtractCSharpDomVisitor<T, S> : ICSharpDomVisitor<T, S>
+	public abstract class DomVisitor<T, S>
 	{
-		protected S VisitChildren (ICSharpNode node, T data)
+		protected virtual S VisitChildren (DomNode node, T data)
 		{
-			ICSharpNode child = node.FirstChild as ICSharpNode;
+			var child = node.FirstChild;
 			while (child != null) {
 				child.AcceptVisitor (this, data);
-				child = child.NextSibling as ICSharpNode;
+				child = child.NextSibling;
 			}
 			return default (S);
 		}
@@ -43,6 +43,11 @@ namespace MonoDevelop.CSharp.Dom
 		public virtual S VisitCompilationUnit (CompilationUnit unit, T data)
 		{
 			return VisitChildren (unit, data);
+		}
+		
+		public virtual S VisitComment (Comment comment, T data)
+		{
+			return default (S);
 		}
 		
 		public virtual S VisitFullTypeName (FullTypeName fullTypeName, T data)
@@ -82,15 +87,10 @@ namespace MonoDevelop.CSharp.Dom
 		
 		public virtual S VisitTypeDeclaration (TypeDeclaration typeDeclaration, T data) 
 		{
-			foreach (ICSharpNode node in typeDeclaration.GetChildrenByRole (TypeDeclaration.Roles.Member)) {
+			foreach (var node in typeDeclaration.GetChildrenByRole (TypeDeclaration.Roles.Member)) {
 				node.AcceptVisitor (this, data);
 			}
 			return default (S);
-		}
-		
-		public virtual S VisitEnumDeclaration (EnumDeclaration enumDeclaration, T data) 
-		{
-			return VisitChildren (enumDeclaration, data);
 		}
 		
 		public virtual S VisitEnumMemberDeclaration (EnumMemberDeclaration enumMemberDeclaration, T data) 
@@ -163,9 +163,9 @@ namespace MonoDevelop.CSharp.Dom
 			return VisitChildren (variableInitializer, data);
 		}
 		
-		public virtual S VisitParameterDeclarationExpression (ParameterDeclarationExpression parameterDeclarationExpression, T data)
+		public virtual S VisitParameterDeclaration (ParameterDeclaration parameterDeclaration, T data)
 		{
-			return VisitChildren (parameterDeclarationExpression, data);
+			return VisitChildren (parameterDeclaration, data);
 		}
 		
 		public virtual S VisitConstraint (Constraint constraint, T data)
@@ -378,7 +378,7 @@ namespace MonoDevelop.CSharp.Dom
 			return VisitChildren (objectCreateExpression, data);
 		}
 		
-		public virtual S VisitArrayObjectCreateExpression (ArrayObjectCreateExpression arrayObjectCreateExpression, T data) 
+		public virtual S VisitArrayCreateExpression (ArrayCreateExpression arrayObjectCreateExpression, T data) 
 		{
 			return VisitChildren (arrayObjectCreateExpression, data);
 		}
@@ -486,6 +486,11 @@ namespace MonoDevelop.CSharp.Dom
 		public virtual S VisitArgListExpression (ArgListExpression argListExpression, T data)
 		{
 			return VisitChildren (argListExpression, data);
+		}
+		
+		public S VisitArrayInitializerExpression (ArrayInitializerExpression arrayInitializerExpression, T data)
+		{
+			return VisitChildren (arrayInitializerExpression, data);
 		}
 	}
 }

@@ -24,14 +24,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System;
-using System.Linq;
-using MonoDevelop.Projects.Dom;
 using System.Collections.Generic;
 
 namespace MonoDevelop.CSharp.Dom
 {
-	public class Attribute : AbstractCSharpNode
+	public class Attribute : DomNode
 	{
 		public override NodeType NodeType {
 			get {
@@ -52,13 +49,13 @@ namespace MonoDevelop.CSharp.Dom
 		}
 		
 		// Todo: Arguments should not be nodes, instead it should be expressions, change when it's implemented.
-		public IEnumerable<INode> Arguments { 
+		public IEnumerable<DomNode> Arguments { 
 			get {
-				return base.GetChildrenByRole (Roles.Argument).Cast <INode>();
+				return base.GetChildrenByRole (Roles.Parameter);
 			}
 		}
 
-		public override S AcceptVisitor<T, S> (ICSharpDomVisitor<T, S> visitor, T data)
+		public override S AcceptVisitor<T, S> (DomVisitor<T, S> visitor, T data)
 		{
 			return visitor.VisitAttribute (this, data);
 		}

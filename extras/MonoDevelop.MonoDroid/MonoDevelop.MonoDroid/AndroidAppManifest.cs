@@ -50,10 +50,8 @@ namespace MonoDevelop.MonoDroid
 			if (manifest.Name != "manifest")
 				throw new Exception ("App manifest does not have 'manifest' root element");
 			
+			// NOTE: Maybe we should create this element for the manifest if needed.
 			application = manifest.Element ("application");
-			if (application == null)
-				throw new Exception ("App manifest does not have 'application' element");
-			
 			
 			usesSdk = manifest.Element ("uses-sdk");
 			if (usesSdk == null)
@@ -184,9 +182,9 @@ namespace MonoDevelop.MonoDroid
 			foreach (var activity in application.Elements ("activity")) {
 				var filter = activity.Element ("intent-filter");
 				if (filter != null) {
-					var category = filter.Element ("category");
-					if (category != null && (string)category.Attribute (aName) == "android.intent.category.LAUNCHER")
-						return (string) activity.Attribute (aName);
+					foreach (var category in filter.Elements ("category"))
+						if (category != null && (string)category.Attribute (aName) == "android.intent.category.LAUNCHER")
+							return (string) activity.Attribute (aName);
 				}
 			}
 			return null;

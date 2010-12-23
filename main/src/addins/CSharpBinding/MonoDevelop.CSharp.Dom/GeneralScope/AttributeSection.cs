@@ -24,14 +24,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System;
-using System.Linq;
-using MonoDevelop.Projects.Dom;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace MonoDevelop.CSharp.Dom
 {
-	public class AttributeSection : AbstractCSharpNode
+	public class AttributeSection : DomNode
 	{
 		const int TargetRole = 101;
 		
@@ -47,14 +45,14 @@ namespace MonoDevelop.CSharp.Dom
 		}
 
 		public Identifier TargetIdentifier {
-			get { return (Identifier)GetChildByRole (TargetRole); }
+			get { return (Identifier)GetChildByRole (TargetRole) ?? Identifier.Null; }
 		}
 
 		public IEnumerable<Attribute> Attributes {
 			get { return base.GetChildrenByRole (Roles.Attribute).Cast<Attribute> (); }
 		}
 
-		public override S AcceptVisitor<T, S> (ICSharpDomVisitor<T, S> visitor, T data)
+		public override S AcceptVisitor<T, S> (DomVisitor<T, S> visitor, T data)
 		{
 			return visitor.VisitAttributeSection (this, data);
 		}

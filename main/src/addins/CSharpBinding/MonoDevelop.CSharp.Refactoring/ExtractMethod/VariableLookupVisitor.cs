@@ -83,7 +83,7 @@ namespace MonoDevelop.CSharp.Refactoring.ExtractMethod
 
 	}
 	
-	public class VariableLookupVisitor : AbtractCSharpDomVisitor<object, object>
+	public class VariableLookupVisitor : DomVisitor<object, object>
 	{
 		List<KeyValuePair <string, IReturnType>> unknownVariables = new List<KeyValuePair <string, IReturnType>> ();
 		Dictionary<string, VariableDescriptor> variables = new Dictionary<string, VariableDescriptor> ();
@@ -153,16 +153,16 @@ namespace MonoDevelop.CSharp.Refactoring.ExtractMethod
 		
 		public override object VisitIdentifierExpression (MonoDevelop.CSharp.Dom.IdentifierExpression identifierExpression, object data)
 		{
-			ExpressionResult expressionResult = new ExpressionResult (identifierExpression.Identifier.Name);
+			ExpressionResult expressionResult = new ExpressionResult (identifierExpression.Identifier);
 			ResolveResult result = resolver.Resolve (expressionResult, position);
 			MemberResolveResult mrr = result as MemberResolveResult;
 			ReferencesMember |= mrr != null && mrr.ResolvedMember != null && !mrr.ResolvedMember.IsStatic;
 			
 			if (!(result is LocalVariableResolveResult || result is ParameterResolveResult))
 				return null;
-			if (!variables.ContainsKey (identifierExpression.Identifier.Name))
+			if (!variables.ContainsKey (identifierExpression.Identifier))
 				return null;
-			var v = variables[identifierExpression.Identifier.Name];
+			var v = variables[identifierExpression.Identifier];
 			v.ReturnType = result.ResolvedType;
 			if (CutRegion.Contains (identifierExpression.StartLocation)) {
 				if (!v.IsChangedInsideCutRegion)
@@ -178,13 +178,13 @@ namespace MonoDevelop.CSharp.Refactoring.ExtractMethod
 		
 		public override object VisitAssignmentExpression (MonoDevelop.CSharp.Dom.AssignmentExpression assignmentExpression, object data)
 		{
-			((ICSharpNode)assignmentExpression.Right).AcceptVisitor(this, data);
+			assignmentExpression.Right.AcceptVisitor(this, data);
 //			valueGetsChanged = true;
 
 			var left = assignmentExpression.Left as MonoDevelop.CSharp.Dom.IdentifierExpression;
 			
-			if (left != null && variables.ContainsKey (left.Identifier.Name)) {
-				var v = variables[left.Identifier.Name];
+			if (left != null && variables.ContainsKey (left.Identifier)) {
+				var v = variables[left.Identifier];
 				v.IsChangedInsideCutRegion = CutRegion.Contains (assignmentExpression.StartLocation);
 				if (!v.IsChangedInsideCutRegion) {
 					if (assignmentExpression.StartLocation < CutRegion.Start) {
@@ -201,8 +201,8 @@ namespace MonoDevelop.CSharp.Refactoring.ExtractMethod
 		{
 			if (CutRegion.Contains (unaryOperatorExpression.StartLocation)) {
 				var left = unaryOperatorExpression.Expression as MonoDevelop.CSharp.Dom.IdentifierExpression;
-				if (left != null && variables.ContainsKey (left.Identifier.Name)) {
-					variables[left.Identifier.Name].IsChangedInsideCutRegion = true;
+				if (left != null && variables.ContainsKey (left.Identifier)) {
+					variables[left.Identifier].IsChangedInsideCutRegion = true;
 				}
 			}
 			/*
@@ -238,7 +238,7 @@ namespace MonoDevelop.CSharp.Refactoring.ExtractMethod
 		{
 			if (!MemberLocation.IsEmpty && methodDeclaration.StartLocation.Line != MemberLocation.Line)
 				return null;
-			foreach (var param in methodDeclaration.Arguments) {
+			foreach (var param in methodDeclaration.Parameters) {
 				
 				variables[param.Identifier.Name] = new VariableDescriptor (param.Identifier.Name);
 				

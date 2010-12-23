@@ -24,31 +24,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System;
-using MonoDevelop.Projects.Dom;
-
 namespace MonoDevelop.CSharp.Dom
 {
-	
-	public class Accessor : AbstractMember
-	{
-		public DomLocation Location {
-			get;
-			set;
-		}
-		
-		public BlockStatement Body {
-			get {
-				return (BlockStatement)GetChildByRole (Roles.Body);
-			}
-		}
-		
-		public override S AcceptVisitor<T, S> (ICSharpDomVisitor<T, S> visitor, T data)
-		{
-			return visitor.VisitAccessorDeclaration (this, data);
-		}
-	}
-	
 	public class PropertyDeclaration : AbstractMember
 	{
 		public const int PropertyGetRole = 100;
@@ -56,29 +33,29 @@ namespace MonoDevelop.CSharp.Dom
 		
 		public CSharpTokenNode LBrace {
 			get {
-				return (CSharpTokenNode)GetChildByRole (Roles.LBrace);
+				return (CSharpTokenNode)GetChildByRole (Roles.LBrace) ?? CSharpTokenNode.Null;
 			}
 		}
 		
 		public CSharpTokenNode RBrace {
 			get {
-				return (CSharpTokenNode)GetChildByRole (Roles.RBrace);
+				return (CSharpTokenNode)GetChildByRole (Roles.RBrace) ?? CSharpTokenNode.Null;
 			}
 		}
 		
 		public Accessor GetAccessor {
 			get {
-				return (Accessor)GetChildByRole (PropertyGetRole);
+				return (Accessor)GetChildByRole (PropertyGetRole) ?? Accessor.Null;
 			}
 		}
 		
 		public Accessor SetAccessor {
 			get {
-				return (Accessor)GetChildByRole (PropertySetRole);
+				return (Accessor)GetChildByRole (PropertySetRole) ?? Accessor.Null;
 			}
 		}
 		
-		public override S AcceptVisitor<T, S> (ICSharpDomVisitor<T, S> visitor, T data)
+		public override S AcceptVisitor<T, S> (DomVisitor<T, S> visitor, T data)
 		{
 			return visitor.VisitPropertyDeclaration (this, data);
 		}

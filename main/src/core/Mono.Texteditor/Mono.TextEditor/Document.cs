@@ -791,6 +791,13 @@ namespace Mono.TextEditor
 		public event EventHandler<UndoOperationEventArgs> Redone;
 		
 		int atomicUndoLevel;
+		
+		public bool IsInAtomicUndo {
+			get {
+				return atomicUndoLevel > 0;
+			}
+		}
+		
 		public void BeginAtomicUndo ()
 		{
 			if (currentAtomicOperation == null) {
@@ -1309,7 +1316,10 @@ namespace Mono.TextEditor
 		
 		public void RemoveMarker (TextMarker marker, bool updateLine)
 		{
-			if (marker == null || marker.LineSegment == null)
+			if (marker == null)
+				return;
+			var line = marker.LineSegment;
+			if (line == null)
 				return;
 			if (marker is IExtendingTextMarker) {
 				lock (extendingTextMarkers) {
@@ -1317,8 +1327,8 @@ namespace Mono.TextEditor
 					extendingTextMarkers.Remove (marker);
 				}
 			}
-			var line = marker.LineSegment;
-			marker.LineSegment.RemoveMarker (marker);
+			
+			line.RemoveMarker (marker);
 			if (updateLine)
 				this.CommitLineUpdate (line);
 		}

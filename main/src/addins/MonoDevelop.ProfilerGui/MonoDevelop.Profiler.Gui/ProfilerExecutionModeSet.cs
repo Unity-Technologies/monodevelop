@@ -1,10 +1,10 @@
 // 
-// AbstractCSharpNode.cs
+// ProfilerExecutionModeSet.cs
 //  
 // Author:
 //       Mike Krüger <mkrueger@novell.com>
 // 
-// Copyright (c) 2009 Novell, Inc (http://www.novell.com)
+// Copyright (c) 2010 Novell, Inc (http://www.novell.com)
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -25,35 +25,26 @@
 // THE SOFTWARE.
 
 using System;
-using MonoDevelop.Projects.Dom;
+using System.Collections.Generic;
+using MonoDevelop.Core;
+using MonoDevelop.Core.Execution;
 
-namespace MonoDevelop.CSharp.Dom
+namespace MonoDevelop.Profiler.Gui
 {
-	
-	public abstract class AbstractCSharpNode : AbstractNode, ICSharpNode
+	public class ProfilerExecutionModeSet: IExecutionModeSet
 	{
-		public abstract NodeType NodeType {
-			get;
+		#region IExecutionModeSet implementation
+		public string Name {
+			get {
+				return GettextCatalog.GetString ("Profiler");
+			}
 		}
 
-		public virtual DomLocation StartLocation {
-			get { 
-				ICSharpNode child = (ICSharpNode)FirstChild;
-				if (child == null)
-					return DomLocation.Empty;
-				return child.StartLocation;
+		public IEnumerable<IExecutionMode> ExecutionModes {
+			get {
+				yield return new ExecutionMode ("Profiler", "Profiler", new ProfilerExecutionHandler ());
 			}
 		}
-		
-		public virtual DomLocation EndLocation {
-			get { 
-				ICSharpNode child = (ICSharpNode)LastChild;
-				if (child == null)
-					return DomLocation.Empty;
-				return child.EndLocation;
-			}
-		}
-		
-		public abstract S AcceptVisitor<T, S> (ICSharpDomVisitor<T, S> visitor, T data);
+		#endregion
 	}
 }

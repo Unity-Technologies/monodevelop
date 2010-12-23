@@ -29,7 +29,7 @@ using System.Collections.Generic;
 
 namespace MonoDevelop.CSharp.Dom
 {
-	public class CompilationUnit : AbstractCSharpNode 
+	public class CompilationUnit : DomNode 
 	{
 		public override NodeType NodeType {
 			get {
@@ -41,22 +41,22 @@ namespace MonoDevelop.CSharp.Dom
 		{
 		}
 		
-		public ICSharpNode GetNodeAt (int line, int column)
+		public DomNode GetNodeAt (int line, int column)
 		{
 			return GetNodeAt (new DomLocation (line, column));
 		}
 		
-		public ICSharpNode GetNodeAt (DomLocation location)
+		public DomNode GetNodeAt (DomLocation location)
 		{
-			ICSharpNode node = this;
+			DomNode node = this;
 			while (node.FirstChild != null) {
-				ICSharpNode child = node.FirstChild as ICSharpNode;
+				var child = node.FirstChild;
 				while (child != null) {
 					if (child.StartLocation <= location && location < child.EndLocation) {
 						node = child;
 						break;
 					}
-					child = child.NextSibling as ICSharpNode;
+					child = child.NextSibling;
 				}
 				// found no better child node - therefore the parent is the right one.
 				if (child == null)
@@ -65,24 +65,24 @@ namespace MonoDevelop.CSharp.Dom
 			return node;
 		}
 		
-		public IEnumerable<ICSharpNode> GetNodesBetween (int startLine, int startColumn, int endLine, int endColumn)
+		public IEnumerable<DomNode> GetNodesBetween (int startLine, int startColumn, int endLine, int endColumn)
 		{
 			return GetNodesBetween (new DomLocation (startLine, startColumn), new DomLocation (endLine, endColumn));
 		}
 		
-		public IEnumerable<ICSharpNode> GetNodesBetween (DomLocation start, DomLocation end)
+		public IEnumerable<DomNode> GetNodesBetween (DomLocation start, DomLocation end)
 		{
-			ICSharpNode node = this;
+			DomNode node = this;
 			while (node != null) {
-				ICSharpNode next;
+				DomNode next;
 				if (start <= node.StartLocation && node.EndLocation < end) {
 					yield return node;
-					next = node.NextSibling as ICSharpNode;
+					next = node.NextSibling;
 				} else {
 					if (node.EndLocation < start) {
-						next = node.NextSibling as ICSharpNode; 
+						next = node.NextSibling; 
 					} else {
-						next = node.FirstChild as ICSharpNode;
+						next = node.FirstChild;
 					}
 				}
 				
@@ -92,7 +92,7 @@ namespace MonoDevelop.CSharp.Dom
 			}
 		}
 		
-		public override S AcceptVisitor<T, S> (ICSharpDomVisitor<T, S> visitor, T data)
+		public override S AcceptVisitor<T, S> (DomVisitor<T, S> visitor, T data)
 		{
 			return visitor.VisitCompilationUnit (this, data);
 		}

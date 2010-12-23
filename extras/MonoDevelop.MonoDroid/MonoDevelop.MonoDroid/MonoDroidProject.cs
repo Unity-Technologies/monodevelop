@@ -215,6 +215,9 @@ namespace MonoDevelop.MonoDroid
 		
 		public override FilePath GetOutputFileName (ConfigurationSelector configuration)
 		{
+			if (!IsAndroidApplication)
+				return base.GetOutputFileName (configuration);
+				
 			if (HackGetUserAssemblyPaths)
 				return base.GetOutputFileName (configuration);
 			
@@ -537,9 +540,13 @@ namespace MonoDevelop.MonoDroid
 		public string GetPackageName (MonoDroidProjectConfiguration conf)
 		{
 			var pf = GetManifestFile (conf);
-			if (pf == null)
-				return null;
-			
+
+			//no manifest, use the same default package name as the MSBuild tasks do
+			if (pf == null) {
+				var name = conf.CompiledOutputName.FileNameWithoutExtension;
+				return string.Format ("{0}.{0}", name.Replace (" ", "").ToLowerInvariant ());
+			}
+
 			if (packageNameCache == null)
 				packageNameCache = new AndroidPackageNameCache (this);
 			

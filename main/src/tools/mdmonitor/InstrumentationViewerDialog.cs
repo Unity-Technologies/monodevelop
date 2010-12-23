@@ -148,14 +148,13 @@ namespace Mono.Instrumentation.Monitor
 		internal void DeleteView (ChartView view)
 		{
 			string msg = string.Format ("Are you sure you want to delete the profile '{0}'?", view.Name);
-			MessageDialog dlg = new MessageDialog (this, DialogFlags.Modal, MessageType.Question, ButtonsType.Ok | ButtonsType.Cancel, msg);
-			if (dlg.Run () == (int) ResponseType.Cancel)
-			
-				return;
-
-			views.Remove (view);
-			SaveViews ();
-			UpdateViews ();
+			MessageDialog dlg = new MessageDialog (this, DialogFlags.Modal, MessageType.Question, ButtonsType.OkCancel, msg);
+			if (dlg.Run () == (int) ResponseType.Ok) {
+				views.Remove (view);
+				SaveViews ();
+				UpdateViews ();
+			}
+			dlg.Destroy ();
 		}
 
 		protected virtual void OnButtonOkClicked (object sender, System.EventArgs e)
@@ -298,6 +297,15 @@ namespace Mono.Instrumentation.Monitor
 			} finally {
 				fdiag.Destroy ();
 			}
+		}
+		
+		public void InstallMacGlobalMenu ()
+		{
+			MacIntegration.IgeMacMenu.GlobalKeyHandlerEnabled = true;
+			MacIntegration.IgeMacMenu.MenuBar = menubar1;
+			var quitItem = (MenuItem) UIManager.GetWidget ("/menubar1/FileAction/ExitAction");
+			MacIntegration.IgeMacMenu.QuitMenuItem = quitItem;
+			menubar1.Hide ();
 		}
 	}		
 	

@@ -37,6 +37,7 @@ using MonoDevelop.Projects.Dom.Parser;
 using MonoDevelop.CSharp.Resolver;
 using MonoDevelop.Projects;
 using MonoDevelop.CSharp.Project;
+using System.CodeDom;
 
 namespace MonoDevelop.CSharp.Parser
 {
@@ -145,20 +146,20 @@ namespace MonoDevelop.CSharp.Parser
 		
 		void VisitComment (ParsedDocument result, SpecialsBag.Comment comment)
 		{
-			var cmt = new Comment (comment.Content);
+			var cmt = new MonoDevelop.Projects.Dom.Comment (comment.Content);
 			cmt.CommentStartsLine = comment.StartsLine;
 			switch (comment.CommentType) {
 			case SpecialsBag.CommentType.Multi:
-				cmt.CommentType = CommentType.MultiLine;
+				cmt.CommentType = MonoDevelop.Projects.Dom.CommentType.MultiLine;
 				cmt.OpenTag = "/*";
 				cmt.ClosingTag = "*/";
 				break;
 			case SpecialsBag.CommentType.Single:
-				cmt.CommentType = CommentType.SingleLine;
+				cmt.CommentType = MonoDevelop.Projects.Dom.CommentType.SingleLine;
 				cmt.OpenTag = "//";
 				break;
 			case SpecialsBag.CommentType.Documentation:
-				cmt.CommentType = CommentType.SingleLine;
+				cmt.CommentType = MonoDevelop.Projects.Dom.CommentType.SingleLine;
 				cmt.IsDocumentation = true;
 				cmt.OpenTag = "///";
 				break;
@@ -587,6 +588,79 @@ namespace MonoDevelop.CSharp.Parser
 				VisitType (e, ClassType.Enum);
 			}
 			
+			class CodeDomVisitor : StructuralVisitor
+			{
+				public override object Visit (Constant constant)
+				{
+					return new CodePrimitiveExpression (constant.GetValue ());
+				}
+				
+				public override object Visit (Unary unaryExpression)
+				{
+					var exprResult = (CodeExpression)unaryExpression.Expr.Accept (this);
+					
+					switch (unaryExpression.Oper) {
+					case Unary.Operator.UnaryPlus:
+						return exprResult;
+					case Unary.Operator.UnaryNegation: // -a => 0 - a
+						return new CodeBinaryOperatorExpression (new CodePrimitiveExpression (0), CodeBinaryOperatorType.Subtract, exprResult);
+					case Unary.Operator.LogicalNot: // !a => a == false
+						return new CodeBinaryOperatorExpression (exprResult, CodeBinaryOperatorType.ValueEquality, new CodePrimitiveExpression (false));
+					}
+					return exprResult;
+				}
+				static CodeBinaryOperatorType Convert (Binary.Operator o)
+				{
+					switch (o) {
+					case Binary.Operator.Multiply:
+						return CodeBinaryOperatorType.Multiply;
+					case Binary.Operator.Division:
+						return CodeBinaryOperatorType.Divide;
+					case Binary.Operator.Modulus:
+						return CodeBinaryOperatorType.Modulus;
+					case Binary.Operator.Addition:
+						return CodeBinaryOperatorType.Add;
+					case Binary.Operator.Subtraction:
+						return CodeBinaryOperatorType.Subtract;
+					case Binary.Operator.LeftShift:
+					case Binary.Operator.RightShift:
+						return CodeBinaryOperatorType.Multiply; // unsupported
+					case Binary.Operator.LessThan:
+						return CodeBinaryOperatorType.LessThan;
+					case Binary.Operator.GreaterThan:
+						return CodeBinaryOperatorType.GreaterThan;
+					case Binary.Operator.LessThanOrEqual:
+						return CodeBinaryOperatorType.LessThanOrEqual;
+					case Binary.Operator.GreaterThanOrEqual:
+						return CodeBinaryOperatorType.GreaterThanOrEqual;
+					case Binary.Operator.Equality:
+						return CodeBinaryOperatorType.IdentityEquality;
+					case Binary.Operator.Inequality:
+						return CodeBinaryOperatorType.IdentityInequality;
+					case Binary.Operator.BitwiseAnd:
+						return CodeBinaryOperatorType.BitwiseAnd;
+					case Binary.Operator.ExclusiveOr:
+						return CodeBinaryOperatorType.BitwiseOr; // unsupported
+					case Binary.Operator.BitwiseOr:
+						return CodeBinaryOperatorType.BitwiseOr;
+					case Binary.Operator.LogicalAnd:
+						return CodeBinaryOperatorType.BooleanAnd;
+					case Binary.Operator.LogicalOr:
+						return CodeBinaryOperatorType.BooleanOr;
+							
+					}
+					return CodeBinaryOperatorType.Add;
+				}
+				
+				public override object Visit (Binary binaryExpression)
+				{
+					return new CodeBinaryOperatorExpression (
+						(CodeExpression)binaryExpression.Left.Accept (this),
+						Convert (binaryExpression.Oper),
+						(CodeExpression)binaryExpression.Right.Accept (this));
+				}
+			}
+			
 			public void AddAttributes (MonoDevelop.Projects.Dom.AbstractMember member, Attributes optAttributes)
 			{
 				if (optAttributes == null || optAttributes.Attrs == null)
@@ -596,6 +670,24 @@ namespace MonoDevelop.CSharp.Parser
 					domAttribute.Name = attr.Name;
 					domAttribute.Region = ConvertRegion (attr.Location, attr.Location);
 					domAttribute.AttributeType = new DomReturnType (attr.Name);
+					if (attr.PosArguments != null) {
+						for (int i = 0; i < attr.PosArguments.Count; i++) {
+							var val = attr.PosArguments[i].Expr as Constant;
+							if (val == null) {
+								continue;
+							}
+							domAttribute.AddPositionalArgument (new CodePrimitiveExpression (val.GetValue ()));
+						}
+					}
+					if (attr.NamedArguments != null) {
+						for (int i = 0; i < attr.NamedArguments.Count; i++) {
+							var val = attr.NamedArguments[i].Expr as Constant;
+							if (val == null)
+								continue;
+							domAttribute.AddNamedArgument (((NamedArgument)attr.NamedArguments[i]).Name, new CodePrimitiveExpression (val.GetValue ()));
+						}
+					}
+					
 					member.Add (domAttribute);
 				}
 			}
@@ -800,8 +892,12 @@ namespace MonoDevelop.CSharp.Parser
 				property.GetterModifier = property.SetterModifier = ConvertModifiers (p.ModFlags);
 				
 				var location = LocationsBag.GetMemberLocation (p);
-				if (location != null)
-					property.BodyRegion = ConvertRegion (location[0], location[1]);
+				if (location != null && location.Count >= 1) {
+					var endLoc = location.Count == 1 ? location[0] : location[1];
+					property.BodyRegion = ConvertRegion (location[0], endLoc);
+				} else {
+					property.BodyRegion = DomRegion.Empty;
+				}
 				property.ReturnType = ConvertReturnType (p.TypeName);
 				
 				AddAttributes (property, p.OptAttributes);
@@ -864,8 +960,12 @@ namespace MonoDevelop.CSharp.Parser
 				indexer.Location = Convert (i.Location);
 				indexer.GetterModifier = indexer.SetterModifier = ConvertModifiers (i.ModFlags);
 				var location = LocationsBag.GetMemberLocation (i);
-				if (location != null)
-					indexer.BodyRegion = ConvertRegion (location[0], location[1]);
+				if (location != null && location.Count >= 1) {
+					var endLoc = location.Count == 1 ? location[0] : location[1];
+					indexer.BodyRegion = ConvertRegion (location[0], endLoc);
+				} else {
+					indexer.BodyRegion = DomRegion.Empty;
+				}
 				
 				indexer.ReturnType = ConvertReturnType (i.TypeName);
 				AddParameter (indexer, i.Parameters);

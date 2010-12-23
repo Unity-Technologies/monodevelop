@@ -1,5 +1,5 @@
 // 
-// ObjectCreateExpression.cs
+// ParameterDeclarationExpression.cs
 //  
 // Author:
 //       Mike Krüger <mkrueger@novell.com>
@@ -25,25 +25,66 @@
 // THE SOFTWARE.
 
 using System;
-using MonoDevelop.Projects.Dom;
 using System.Collections.Generic;
+using System.Linq;
+
 namespace MonoDevelop.CSharp.Dom
 {
-	public class ArrayObjectCreateExpression : ObjectCreateExpression
+	
+	public enum ParameterModifier {
+		None,
+		Ref,
+		Out,
+		Params,
+		This
+	}
+	
+	public class ParameterDeclaration : DomNode
 	{
 		public override NodeType NodeType {
 			get {
-				return NodeType.Expression;
+				return NodeType.Unknown;
 			}
 		}
-
-		public CSharpTokenNode Rank {
-			get { return (CSharpTokenNode)GetChildByRole (Roles.RPar); }
+		
+		public ParameterModifier ParameterModifier {
+			get;
+			set;
 		}
 		
-		public override S AcceptVisitor<T, S> (ICSharpDomVisitor<T, S> visitor, T data)
+		public Identifier Identifier {
+			get {
+				return (Identifier)GetChildByRole (Roles.Identifier) ?? Identifier.Null;
+			}
+		}
+		
+		public string Name {
+			get {
+				Identifier i = this.Identifier;
+				return i != null ? i.Name : null;
+			}
+		}
+		
+		public DomNode DefaultExpression {
+			get {
+				return GetChildByRole (Roles.Expression) ?? DomNode.Null;
+			}
+		}
+		
+		public DomNode Type {
+			get { return GetChildByRole (Roles.ReturnType) ?? DomNode.Null; }
+		}
+		
+		public IEnumerable<AttributeSection> Attributes {
+			get {
+				return base.GetChildrenByRole (Roles.Attribute).Cast <AttributeSection>();
+			}
+		}
+		
+		public override S AcceptVisitor<T, S> (DomVisitor<T, S> visitor, T data)
 		{
-			return visitor.VisitArrayObjectCreateExpression (this, data);
+			return visitor.VisitParameterDeclaration (this, data);
 		}
 	}
 }
+

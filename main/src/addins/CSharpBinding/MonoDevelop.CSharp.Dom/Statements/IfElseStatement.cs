@@ -24,12 +24,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System;
-using MonoDevelop.Projects.Dom;
-
 namespace MonoDevelop.CSharp.Dom
 {
-	public class IfElseStatement : AbstractCSharpNode
+	public class IfElseStatement : DomNode
 	{
 		public const int TrueEmbeddedStatementRole = 100;
 		public const int FalseEmbeddedStatementRole = 101;
@@ -42,35 +39,35 @@ namespace MonoDevelop.CSharp.Dom
 			}
 		}
 
-		public ICSharpNode TrueEmbeddedStatement {
-			get { return (ICSharpNode)GetChildByRole (TrueEmbeddedStatementRole); }
+		public DomNode TrueEmbeddedStatement {
+			get { return GetChildByRole (TrueEmbeddedStatementRole) ?? DomNode.Null; }
 		}
 		
-		public ICSharpNode FalseEmbeddedStatement {
-			get { return (ICSharpNode)GetChildByRole (FalseEmbeddedStatementRole); }
+		public DomNode FalseEmbeddedStatement {
+			get { return GetChildByRole (FalseEmbeddedStatementRole) ?? DomNode.Null; }
 		}
 
-		public ICSharpNode Condition {
-			get { return (ICSharpNode)GetChildByRole (Roles.Condition); }
+		public DomNode Condition {
+			get { return GetChildByRole (Roles.Condition) ?? DomNode.Null; }
 		}
 		
 		public CSharpTokenNode LPar {
-			get { return (CSharpTokenNode)GetChildByRole (Roles.LPar); }
+			get { return (CSharpTokenNode)GetChildByRole (Roles.LPar) ?? CSharpTokenNode.Null; }
 		}
 		
 		public CSharpTokenNode RPar {
-			get { return (CSharpTokenNode)GetChildByRole (Roles.RPar); }
+			get { return (CSharpTokenNode)GetChildByRole (Roles.RPar) ?? CSharpTokenNode.Null; }
 		}
 		
 		public CSharpTokenNode IfKeyword {
-			get { return (CSharpTokenNode)GetChildByRole (IfKeywordRole); }
+			get { return (CSharpTokenNode)GetChildByRole (IfKeywordRole) ?? CSharpTokenNode.Null; }
 		}
 		
 		public CSharpTokenNode ElseKeyword {
-			get { return (CSharpTokenNode)GetChildByRole (ElseKeywordRole); }
+			get { return (CSharpTokenNode)GetChildByRole (ElseKeywordRole) ?? CSharpTokenNode.Null; }
 		}
 		
-		public override S AcceptVisitor<T, S> (ICSharpDomVisitor<T, S> visitor, T data)
+		public override S AcceptVisitor<T, S> (DomVisitor<T, S> visitor, T data)
 		{
 			return visitor.VisitIfElseStatement (this, data);
 		}

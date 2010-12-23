@@ -24,10 +24,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System;
+using System.Collections.Generic;
 using System.Linq;
 using MonoDevelop.Projects.Dom;
-using System.Collections.Generic;
 
 namespace MonoDevelop.CSharp.Dom
 {
@@ -53,9 +52,9 @@ namespace MonoDevelop.CSharp.Dom
 			}
 		}
 		
-		public IEnumerable<ICSharpNode> TypeArguments {
+		public IEnumerable<DomNode> TypeParameters {
 			get {
-				return GetChildrenByRole (Roles.TypeArgument).Cast<ICSharpNode> ();
+				return GetChildrenByRole (Roles.TypeParameter);
 			}
 		}
 		
@@ -67,13 +66,13 @@ namespace MonoDevelop.CSharp.Dom
 		
 		public CSharpTokenNode LBrace {
 			get {
-				return (CSharpTokenNode)GetChildByRole (Roles.LBrace);
+				return (CSharpTokenNode)GetChildByRole (Roles.LBrace) ?? CSharpTokenNode.Null;
 			}
 		}
 		
 		public CSharpTokenNode RBrace {
 			get {
-				return (CSharpTokenNode)GetChildByRole (Roles.RBrace);
+				return (CSharpTokenNode)GetChildByRole (Roles.RBrace) ?? CSharpTokenNode.Null;
 			}
 		}
 		
@@ -82,7 +81,13 @@ namespace MonoDevelop.CSharp.Dom
 			set;
 		}
 		
-		public override S AcceptVisitor<T, S> (ICSharpDomVisitor<T, S> visitor, T data)
+		public IEnumerable<AbstractMemberBase> Members {
+			get {
+				return GetChildrenByRole (Roles.Member).Cast<AbstractMemberBase> ();
+			}
+		}
+		
+		public override S AcceptVisitor<T, S> (DomVisitor<T, S> visitor, T data)
 		{
 			return visitor.VisitTypeDeclaration (this, data);
 		}

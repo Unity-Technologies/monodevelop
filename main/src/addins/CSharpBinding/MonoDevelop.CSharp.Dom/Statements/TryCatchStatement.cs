@@ -24,14 +24,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System;
-using System.Linq;
-using MonoDevelop.Projects.Dom;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace MonoDevelop.CSharp.Dom
 {
-	public class TryCatchStatement : AbstractCSharpNode
+	public class TryCatchStatement : DomNode
 	{
 		public const int TryKeywordRole     = 100;
 		public const int FinallyKeywordRole = 101;
@@ -46,32 +44,32 @@ namespace MonoDevelop.CSharp.Dom
 		}
 
 		public CSharpTokenNode TryKeyword {
-			get { return (CSharpTokenNode)GetChildByRole (TryKeywordRole); }
+			get { return (CSharpTokenNode)GetChildByRole (TryKeywordRole) ?? CSharpTokenNode.Null; }
 		}
 		
 		public CSharpTokenNode FinallyKeyword {
-			get { return (CSharpTokenNode)GetChildByRole (FinallyKeywordRole); }
+			get { return (CSharpTokenNode)GetChildByRole (FinallyKeywordRole) ?? CSharpTokenNode.Null; }
 		}
 		
 		public BlockStatement TryBlock {
-			get { return (BlockStatement)GetChildByRole (TryBlockRole); }
+			get { return (BlockStatement)GetChildByRole (TryBlockRole) ?? BlockStatement.Null; }
 		}
 		
 		public BlockStatement FinallyBlock {
-			get { return (BlockStatement)GetChildByRole (FinallyBlockRole); }
+			get { return (BlockStatement)GetChildByRole (FinallyBlockRole) ?? BlockStatement.Null; }
 		}
 		
 		public IEnumerable<CatchClause> CatchClauses {
 			get { return GetChildrenByRole (CatchClauseRole).Cast<CatchClause> (); }
 		}
 		
-		public override S AcceptVisitor<T, S> (ICSharpDomVisitor<T, S> visitor, T data)
+		public override S AcceptVisitor<T, S> (DomVisitor<T, S> visitor, T data)
 		{
 			return visitor.VisitTryCatchStatement (this, data);
 		}
 	}
 	
-	public class CatchClause : AbstractCSharpNode
+	public class CatchClause : DomNode
 	{
 		public override NodeType NodeType {
 			get {
@@ -79,8 +77,8 @@ namespace MonoDevelop.CSharp.Dom
 			}
 		}
 		
-		public ICSharpNode ReturnType {
-			get { return (ICSharpNode)GetChildByRole (Roles.ReturnType); }
+		public DomNode ReturnType {
+			get { return GetChildByRole (Roles.ReturnType); }
 		}
 		
 		public string VariableName {
@@ -107,7 +105,7 @@ namespace MonoDevelop.CSharp.Dom
 			get { return (CSharpTokenNode)GetChildByRole (Roles.Keyword); }
 		}
 		
-		public override S AcceptVisitor<T, S> (ICSharpDomVisitor<T, S> visitor, T data)
+		public override S AcceptVisitor<T, S> (DomVisitor<T, S> visitor, T data)
 		{
 			return visitor.VisitCatchClause (this, data);
 		}

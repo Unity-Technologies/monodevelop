@@ -24,14 +24,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System;
-using System.Linq;
-using MonoDevelop.Projects.Dom;
 using System.Collections.Generic;
 
 namespace MonoDevelop.CSharp.Dom
 {
-	public class InvocationExpression : AbstractCSharpNode
+	public class InvocationExpression : DomNode
 	{
 		public override NodeType NodeType {
 			get {
@@ -39,23 +36,23 @@ namespace MonoDevelop.CSharp.Dom
 			}
 		}
 
-		public INode Target {
-			get { return GetChildByRole (Roles.TargetExpression); }
+		public DomNode Target {
+			get { return GetChildByRole (Roles.TargetExpression) ?? DomNode.Null; }
 		}
 		
-		public IEnumerable<ICSharpNode> Arguments {
-			get { return GetChildrenByRole (Roles.Argument).Cast<ICSharpNode> (); }
+		public IEnumerable<DomNode> Arguments {
+			get { return GetChildrenByRole (Roles.Parameter); }
 		}
 		
 		public CSharpTokenNode LPar {
-			get { return (CSharpTokenNode)GetChildByRole (Roles.LPar); }
+			get { return (CSharpTokenNode)GetChildByRole (Roles.LPar) ?? CSharpTokenNode.Null; }
 		}
 		
 		public CSharpTokenNode RPar {
-			get { return (CSharpTokenNode)GetChildByRole (Roles.RPar); }
+			get { return (CSharpTokenNode)GetChildByRole (Roles.RPar) ?? CSharpTokenNode.Null; }
 		}
 		
-		public override S AcceptVisitor<T, S> (ICSharpDomVisitor<T, S> visitor, T data)
+		public override S AcceptVisitor<T, S> (DomVisitor<T, S> visitor, T data)
 		{
 			return visitor.VisitInvocationExpression (this, data);
 		}

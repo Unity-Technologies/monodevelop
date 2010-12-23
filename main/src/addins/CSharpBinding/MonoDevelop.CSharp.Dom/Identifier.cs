@@ -24,14 +24,27 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System;
-using Mono.TextEditor;
 using MonoDevelop.Projects.Dom;
 
 namespace MonoDevelop.CSharp.Dom
 {
-	public class Identifier : AbstractCSharpNode
+	public class Identifier : DomNode
 	{
+		public static readonly new Identifier Null = new NullIdentifier ();
+		class NullIdentifier : Identifier
+		{
+			public override bool IsNull {
+				get {
+					return true;
+				}
+			}
+			
+			public override S AcceptVisitor<T, S> (DomVisitor<T, S> visitor, T data)
+			{
+				return default (S);
+			}
+		}
+		
 		public override NodeType NodeType {
 			get {
 				return NodeType.Unknown;
@@ -72,7 +85,7 @@ namespace MonoDevelop.CSharp.Dom
 			this.startLocation = location;
 		}
 		
-		public override S AcceptVisitor<T, S> (ICSharpDomVisitor<T, S> visitor, T data)
+		public override S AcceptVisitor<T, S> (DomVisitor<T, S> visitor, T data)
 		{
 			return visitor.VisitIdentifier (this, data);
 		}

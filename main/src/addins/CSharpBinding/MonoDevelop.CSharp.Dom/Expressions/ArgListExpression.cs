@@ -24,17 +24,14 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using MonoDevelop.Projects.Dom;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace MonoDevelop.CSharp.Dom
 {
 	/// <summary>
 	/// Represents the undocumented __arglist keyword.
 	/// </summary>
-	public class ArgListExpression : AbstractCSharpNode
+	public class ArgListExpression : DomNode
 	{
 		public override NodeType NodeType {
 			get {
@@ -48,22 +45,22 @@ namespace MonoDevelop.CSharp.Dom
 		}
 		
 		public CSharpTokenNode Keyword {
-			get { return (CSharpTokenNode)GetChildByRole (Roles.Keyword); }
+			get { return (CSharpTokenNode)GetChildByRole (Roles.Keyword) ?? CSharpTokenNode.Null; }
 		}
 		
 		public CSharpTokenNode LPar {
-			get { return (CSharpTokenNode)GetChildByRole (Roles.LPar); }
+			get { return (CSharpTokenNode)GetChildByRole (Roles.LPar) ?? CSharpTokenNode.Null; }
 		}
 		
 		public CSharpTokenNode RPar {
-			get { return (CSharpTokenNode)GetChildByRole (Roles.RPar); }
+			get { return (CSharpTokenNode)GetChildByRole (Roles.RPar) ?? CSharpTokenNode.Null; }
 		}
 		
-		public IEnumerable<ICSharpNode> Arguments {
-			get { return GetChildrenByRole (Roles.Argument).Cast<ICSharpNode> (); }
+		public IEnumerable<DomNode> Arguments {
+			get { return GetChildrenByRole (Roles.Parameter); }
 		}
 		
-		public override S AcceptVisitor<T, S> (ICSharpDomVisitor<T, S> visitor, T data)
+		public override S AcceptVisitor<T, S> (DomVisitor<T, S> visitor, T data)
 		{
 			return visitor.VisitArgListExpression (this, data);
 		}

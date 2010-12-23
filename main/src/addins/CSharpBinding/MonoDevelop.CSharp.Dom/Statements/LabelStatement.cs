@@ -24,12 +24,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System;
-using MonoDevelop.Projects.Dom;
-
 namespace MonoDevelop.CSharp.Dom
 {
-	public class LabelStatement : AbstractCSharpNode
+	public class LabelStatement : DomNode
 	{
 		public override NodeType NodeType {
 			get {
@@ -42,10 +39,10 @@ namespace MonoDevelop.CSharp.Dom
 		}
 
 		public Identifier LabelIdentifier {
-			get { return (Identifier)GetChildByRole (Roles.Identifier); }
+			get { return (Identifier)GetChildByRole (Roles.Identifier) ?? Identifier.Null; }
 		}
 		
-		public override S AcceptVisitor<T, S> (ICSharpDomVisitor<T, S> visitor, T data)
+		public override S AcceptVisitor<T, S> (DomVisitor<T, S> visitor, T data)
 		{
 			return visitor.VisitLabelStatement (this, data);
 		}

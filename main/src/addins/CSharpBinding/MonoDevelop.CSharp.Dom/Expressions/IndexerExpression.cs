@@ -24,14 +24,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System;
-using System.Linq;
-using MonoDevelop.Projects.Dom;
 using System.Collections.Generic;
 
 namespace MonoDevelop.CSharp.Dom
 {
-	public class IndexerExpression : AbstractCSharpNode
+	public class IndexerExpression : DomNode
 	{
 		public override NodeType NodeType {
 			get {
@@ -39,27 +36,27 @@ namespace MonoDevelop.CSharp.Dom
 			}
 		}
 
-		public ICSharpNode Target {
-			get { return (ICSharpNode)GetChildByRole (Roles.TargetExpression); }
+		public DomNode Target {
+			get { return GetChildByRole (Roles.TargetExpression); }
 		}
 		
 		public CSharpTokenNode LBracket {
 			get {
-				return (CSharpTokenNode)GetChildByRole (Roles.LBracket);
+				return (CSharpTokenNode)GetChildByRole (Roles.LBracket) ?? CSharpTokenNode.Null;
 			}
 		}
 		
 		public CSharpTokenNode RBracket {
 			get {
-				return (CSharpTokenNode)GetChildByRole (Roles.RBracket);
+				return (CSharpTokenNode)GetChildByRole (Roles.RBracket) ?? CSharpTokenNode.Null;
 			}
 		}
 		
-		public IEnumerable<INode> Arguments {
-			get { return GetChildrenByRole (Roles.Argument); }
+		public IEnumerable<DomNode> Arguments {
+			get { return GetChildrenByRole (Roles.Parameter); }
 		}
 		
-		public override S AcceptVisitor<T, S> (ICSharpDomVisitor<T, S> visitor, T data)
+		public override S AcceptVisitor<T, S> (DomVisitor<T, S> visitor, T data)
 		{
 			return visitor.VisitIndexerExpression (this, data);
 		}
