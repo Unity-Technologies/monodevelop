@@ -600,7 +600,7 @@ namespace Mono.Debugging.Soft
             if (!rv && (val is ObjectMirror)) {
                 ObjectMirror objekt = val as ObjectMirror;
                 TypeMirror type = (TypeMirror)GetBaseType(ctx, objekt.Type, false);
-                if (type.FullName.StartsWith ("UnityEngine.", StringComparison.Ordinal) || type.FullName.StartsWith ("UnityEditor.", StringComparison.Ordinal))
+                if (null != type && !string.IsNullOrEmpty (type.FullName) && (type.FullName.StartsWith ("UnityEngine.", StringComparison.Ordinal) || type.FullName.StartsWith ("UnityEditor.", StringComparison.Ordinal)))
                 {
                     SoftEvaluationContext cx = (SoftEvaluationContext)ctx;
                     MethodMirror method = OverloadResolve(cx, "GetInstanceID", objekt.Type, new TypeMirror[] { }, true, false, false);
