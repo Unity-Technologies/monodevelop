@@ -12,7 +12,7 @@ CECIL_DIST= $(CECIL_CSFILES) $(CECIL_SNK)
 
 $(CECIL): $(CECIL_CSFILES)
 	mkdir -p $(BINDIR)
-	mcs $(CECIL_CSFILES) /keyfile:$(CECIL_SNK) /debug /target:library /out:$(CECIL)
+	gmcs $(CECIL_CSFILES) /keyfile:$(CECIL_SNK) /debug /target:library /out:$(CECIL)
 
 $(CECIL_DEBUG): $(CECIL)
 
