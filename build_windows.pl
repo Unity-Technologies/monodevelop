@@ -133,6 +133,8 @@ system("$nant -t:net-4.0 rebuild") && die ("Failed to build Boo MD Addins");
 mkpath "$mdRoot/AddIns/BackendBindings/Boo";
 copy "$root/boo-md-addins/build/Boo.MonoDevelop.dll", "$mdRoot/AddIns/BackendBindings/Boo";
 copy "$root/boo-md-addins/build/Boo.Ide.dll", "$mdRoot/AddIns/BackendBindings/Boo";
+copy "$root/boo-md-addins/build/UnityScript.dll", "$mdRoot/AddIns/BackendBindings/Boo/boo";
+copy "$root/boo-md-addins/build/UnityScript.Lang.dll", "$mdRoot/AddIns/BackendBindings/Boo/boo";
 copy "$root/boo-md-addins/build/UnityScript.Ide.dll", "$mdRoot/AddIns/BackendBindings/Boo";
 copy "$root/boo-md-addins/build/Boo.MonoDevelop.Util.dll", "$mdRoot/AddIns/BackendBindings/Boo";
 
