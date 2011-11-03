@@ -24,7 +24,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 using System;
+using System.Linq;
 using MonoDevelop.Components.Commands;
+using Mono.Addins;
+using MonoDevelop.VersionControl;
+using MonoDevelop.Ide.Gui;
 
 namespace MonoDevelop.VersionControl.Views
 {
@@ -36,7 +40,7 @@ namespace MonoDevelop.VersionControl.Views
 			Core.FileService.FileChanged += HandleCoreFileServiceFileChanged;
 		}
 		
-		static void AttachViewContents (MonoDevelop.Ide.Gui.Document document)
+		void AttachViewContents (MonoDevelop.Ide.Gui.Document document)
 		{
 			if (document == null || document.Project == null)
 				return;
@@ -48,7 +52,11 @@ namespace MonoDevelop.VersionControl.Views
 			if (document.Editor == null)
 				return;
 			
-			DiffView.AttachViewContents (document, new VersionControlItem (repo, document.Project, document.FileName, false, null));
+			var item = new VersionControlItem (repo, document.Project, document.FileName, false, null);
+			TryAttachView <IDiffView> (document, item, DiffCommand.DiffViewHandlers);
+			TryAttachView <IBlameView> (document, item, BlameCommand.BlameViewHandlers);
+			TryAttachView <ILogView> (document, item, LogCommand.LogViewHandlers);
+			TryAttachView <IMergeView> (document, item, MergeCommand.MergeViewHandlers);
 		}
 
 		void HandleCoreFileServiceFileChanged (object sender, Core.FileEventArgs e)
@@ -61,6 +69,15 @@ namespace MonoDevelop.VersionControl.Views
 		void HandleDocumentOpened (object sender, Ide.Gui.DocumentEventArgs e)
 		{
 			AttachViewContents (e.Document);
+		}
+		
+		void TryAttachView <T>(Document document, VersionControlItem item, string type)
+			where T : IAttachableViewContent
+		{
+			var handler = AddinManager.GetExtensionObjects<IVersionControlViewHandler<T>> (type).FirstOrDefault (h => h.CanHandle (item));
+			if (handler != null) {
+				document.Window.AttachViewContent (handler.CreateView (item, document.PrimaryView));
+			}
 		}
 	}
 }

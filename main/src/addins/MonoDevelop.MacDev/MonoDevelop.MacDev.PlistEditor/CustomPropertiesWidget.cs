@@ -139,6 +139,8 @@ namespace MonoDevelop.MacDev.PlistEditor
 						Gtk.TreeIter parentIter;
 						if (widget.treeStore.IterParent (out parentIter, iter))
 							parent = (PObject)widget.treeStore.GetValue (parentIter, 1);
+						else
+							parent = widget.nsDictionary;
 					}
 					
 					if (parent is PArray) {
@@ -276,11 +278,7 @@ namespace MonoDevelop.MacDev.PlistEditor
 				var key = scheme.Keys.FirstOrDefault (k => k.Identifier == args.NewText || k.Description == args.NewText);
 				var newKey = key != null ? key.Identifier : args.NewText;
 				
-				if (!dict.ChangeKey (obj, newKey))
-					return;
-				
-				treeStore.SetValue (selIter, 0, newKey);
-				obj.Replace (CreateNewObject (key.Type));
+				dict.ChangeKey (obj, newKey, key == null || obj.TypeString == key.Type ? null : CreateNewObject (key.Type));
 			};
 			var col = new TreeViewColumn ();
 			col.Resizable = true;
@@ -386,11 +384,8 @@ namespace MonoDevelop.MacDev.PlistEditor
 					return;
 				
 				PObject oldObj = (PObject)treeStore.GetValue (selIter, 1);
-				if (oldObj == null)
-					return;
-				var newObj = CreateNewObject (args.NewText);
-				
-				oldObj.Replace (newObj);
+				if (oldObj != null && oldObj.TypeString != args.NewText)
+					oldObj.Replace (CreateNewObject (args.NewText));
 			};
 			
 			treeview1.AppendColumn (GettextCatalog.GetString ("Type"), comboRenderer, delegate(TreeViewColumn tree_column, CellRenderer cell, TreeModel tree_model, TreeIter iter) {
