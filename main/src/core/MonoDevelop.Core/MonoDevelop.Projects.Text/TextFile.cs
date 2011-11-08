@@ -130,8 +130,7 @@ namespace MonoDevelop.Projects.Text
 				string s = ConvertFromEncoding (content, encoding);
 				text = new StringBuilder (s);
 				sourceEncoding = encoding;
-			}
-			else {
+			} else {
 				string enc = (from bom in bomTable where content.StartsWith (bom.Bytes) select bom.Enc).FirstOrDefault ();
 				if (!string.IsNullOrEmpty (enc)) {
 					// remove the BOM (see bug Bug 538827 – Pango crash when opening a specific file)
@@ -153,13 +152,17 @@ namespace MonoDevelop.Projects.Text
 				HadBOM = false;
 				
 				foreach (TextEncoding co in TextEncoding.ConversionEncodings) {
-					string s = ConvertFromEncoding (content, co.Id);
-					if (s != null) {
-						sourceEncoding = co.Id;
-						text = new StringBuilder (s);
-						return;
+					try {
+						string s = ConvertFromEncoding (content, co.Id);
+						if (s != null) {
+							sourceEncoding = co.Id;
+							text = new StringBuilder (s);
+							return;
+						}
+					} catch (InvalidEncodingException ex) {
+						LoggingService.LogDebug (string.Format ("Skipping encoding {0}", co), ex);
 					}
-				}
+				} 
 				
 /*				if (string.IsNullOrEmpty (enc))
 					enc = "UTF-8";

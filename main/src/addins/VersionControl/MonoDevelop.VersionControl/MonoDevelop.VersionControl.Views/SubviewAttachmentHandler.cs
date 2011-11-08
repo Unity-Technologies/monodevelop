@@ -71,9 +71,13 @@ namespace MonoDevelop.VersionControl.Views
 			AttachViewContents (e.Document);
 		}
 		
-		void TryAttachView <T>(Document document, VersionControlItem item, string type)
+		void TryAttachView <T> (Document document, VersionControlItem item, string type)
 			where T : IAttachableViewContent
 		{
+			// Don't reattach existing views
+			if (0 <= document.Window.FindView<T> ())
+				return;
+				
 			var handler = AddinManager.GetExtensionObjects<IVersionControlViewHandler<T>> (type).FirstOrDefault (h => h.CanHandle (item));
 			if (handler != null) {
 				document.Window.AttachViewContent (handler.CreateView (item, document.PrimaryView));

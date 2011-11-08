@@ -1346,28 +1346,30 @@ namespace Mono.Debugging.Soft
 			
 			var resolved = new List<BreakInfo> ();
 			
-			foreach (string s in type_to_source [t]) {
-				foreach (var bi in pending_bes.Where (b => b.BreakEvent is Breakpoint)) {
-					var bp = (Breakpoint) bi.BreakEvent;
-					if (PathComparer.Compare (PathToFileName (bp.FileName), s) == 0) {
-						bool inisideLoadedRange;
-						Location l = GetLocFromType (t, s, bp.Line, out inisideLoadedRange);
-						if (l != null) {
-							OnDebuggerOutput (false, string.Format ("Resolved pending breakpoint at '{0}:{1}' to {2} [0x{3:x5}].\n",
-							                                        s, l.LineNumber, l.Method.FullName, l.ILOffset));
-							ResolvePendingBreakpoint (bi, l);
-							resolved.Add (bi);
-						} else {
-							if (inisideLoadedRange) {
-								bi.SetStatus (BreakEventStatus.Invalid, null);
+			if (type_to_source.ContainsKey (t)) {
+				foreach (string s in type_to_source [t]) {
+					foreach (var bi in pending_bes.Where (b => b.BreakEvent is Breakpoint)) {
+						var bp = (Breakpoint) bi.BreakEvent;
+						if (PathComparer.Compare (PathToFileName (bp.FileName), s) == 0) {
+							bool inisideLoadedRange;
+							Location l = GetLocFromType (t, s, bp.Line, out inisideLoadedRange);
+							if (l != null) {
+								OnDebuggerOutput (false, string.Format ("Resolved pending breakpoint at '{0}:{1}' to {2} [0x{3:x5}].\n",
+								                                        s, l.LineNumber, l.Method.FullName, l.ILOffset));
+								ResolvePendingBreakpoint (bi, l);
+								resolved.Add (bi);
+							} else {
+								if (inisideLoadedRange) {
+									bi.SetStatus (BreakEventStatus.Invalid, null);
+								}
 							}
 						}
 					}
+					
+					foreach (var be in resolved)
+						pending_bes.Remove (be);
+					resolved.Clear ();
 				}
-				
-				foreach (var be in resolved)
-					pending_bes.Remove (be);
-				resolved.Clear ();
 			}
 			
 			//handle pending catchpoints
