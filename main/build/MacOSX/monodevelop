@@ -89,7 +89,7 @@ if [ -d "$DIR/lib/moonlight" ]; then
         export MOONLIGHT_SDK_PATH="$DIR/lib/moonlight"
 fi
 
-_MD_LOG_FILE="${MD_LOG_FILE:-$HOME/Library/Logs/MonoDevelop-$MONODEVELOP_MAJOR_VERSION/MonoDevelop.log}"
+_MD_LOG_FILE="${MD_LOG_FILE:-$HOME/Library/Logs/MonoDevelop-Unity-$MONODEVELOP_MAJOR_VERSION/MonoDevelop.log}"
 
 # NOTE: remove this for stable releases
 if [ -z "$MD_NO_DEBUG" ]; then
