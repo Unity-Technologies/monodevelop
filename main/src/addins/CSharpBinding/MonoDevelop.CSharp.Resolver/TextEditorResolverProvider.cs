@@ -49,8 +49,10 @@ namespace MonoDevelop.CSharp.Resolver
 			if (parser == null)
 				return null;
 			
-			MonoDevelop.Ide.Gui.Document doc = IdeApp.Workbench.ActiveDocument;
-			if (doc == null)
+			MonoDevelop.Ide.Gui.Document doc = IdeApp.Workbench.GetDocument (fileName);
+			if (doc == null || doc.Editor == null)
+				doc = IdeApp.Workbench.ActiveDocument;
+			if (doc == null || doc.Editor == null)
 				return null;
 			
 			IResolver resolver = parser.CreateResolver (dom, doc, fileName);
@@ -196,6 +198,8 @@ namespace MonoDevelop.CSharp.Resolver
 		{
 			string fileName = data.Document.FileName;
 			MonoDevelop.Ide.Gui.Document doc = IdeApp.Workbench.GetDocument (fileName);
+			if (doc == null || doc.Editor == null)
+				doc = IdeApp.Workbench.ActiveDocument;
 			if (doc == null || doc.Editor == null)
 				return null;
 			
