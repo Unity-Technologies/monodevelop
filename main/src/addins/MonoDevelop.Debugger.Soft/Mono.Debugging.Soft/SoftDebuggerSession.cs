@@ -1033,7 +1033,7 @@ namespace Mono.Debugging.Soft
 				
 				// Mark affected breakpoints as pending again
 				var affectedBreakpoints = new List<KeyValuePair<EventRequest, BreakInfo>> (
-					breakpoints.Where (x=> (x.Value.Location.Method.DeclaringType.Assembly.Location.Equals (aue.Assembly.Location, StringComparison.OrdinalIgnoreCase)))
+					breakpoints.Where (x=> (x.Key.Enabled && x.Value.Location.Method.DeclaringType.Assembly.Location.Equals (aue.Assembly.Location, StringComparison.OrdinalIgnoreCase)))
 				);
 				foreach (KeyValuePair<EventRequest,BreakInfo> breakpoint in affectedBreakpoints) {
 					string file = PathToFileName (breakpoint.Value.Location.SourceFile);
