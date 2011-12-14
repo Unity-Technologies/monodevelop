@@ -342,10 +342,8 @@ namespace MonoDevelop.Ide
 				}
 			}
 
-			if (!foundSln)
+			if (!(foundSln || Workspace.IsLoading))
 				loadFilteredFiles (null, null);
-			
-
 			
 			Workbench.Present ();
 		}
