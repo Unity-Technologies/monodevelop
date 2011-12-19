@@ -263,7 +263,7 @@ namespace MonoDevelop.Ide
 			if ((bool)PropertyService.Get("SharpDevelop.LoadPrevProjectOnStartup", true)) {
 				var proj = DesktopService.RecentFiles.GetProjects ().FirstOrDefault ();
 				if (proj != null) { 
-					IdeApp.Workspace.OpenWorkspaceItem (proj.FileName).WaitForCompleted ();
+					IdeApp.Workspace.OpenWorkspaceItem (proj.FileName);
 				}
 			}
 			
@@ -325,7 +325,7 @@ namespace MonoDevelop.Ide
 				    Services.ProjectService.IsSolutionItemFile (file.FileName)) {
 					// Don't reload the currently open solution
 					if (null != Workspace.Items.FirstOrDefault (x =>
-					    (x.FileName.FullPath.ToString ().Equals(file.FileName, StringComparison.OrdinalIgnoreCase)))) {
+					    (x.FileName.FullPath.ToString ().Equals(file.FileName, StringComparison.OrdinalIgnoreCase) && !x.NeedsReload))) {
 						loadFilteredFiles (null, null);
 						foundSln = true;
 					}
