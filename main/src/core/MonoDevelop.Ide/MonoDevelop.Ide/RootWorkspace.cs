@@ -832,20 +832,27 @@ namespace MonoDevelop.Ide
 		{
 			if (item.NeedsReload) {
 				IEnumerable<string> closedDocs;
+				IAsyncOperation openOperation = null;
+
 				if (AllowReload (item.GetAllProjects (), out closedDocs)) {
 					if (item.ParentWorkspace == null) {
 						string file = item.FileName;
 						SavePreferences ();
 						CloseWorkspaceItem (item);
-						OpenWorkspaceItem (file, false);
+						openOperation = OpenWorkspaceItem (file, false);
 					}
 					else {
 						using (IProgressMonitor m = IdeApp.Workbench.ProgressMonitors.GetSaveProgressMonitor (true)) {
 							item.ParentWorkspace.ReloadItem (m, item);
-							ReattachDocumentProjects (closedDocs);
 						}
 					}
 
+					if (closedDocs != null) {
+						if (openOperation != null)
+							// Wait for reload before reattaching
+							openOperation.WaitForCompleted ();
+						ReattachDocumentProjects(closedDocs);
+					}
 					return;
 				} else
 					item.NeedsReload = false;

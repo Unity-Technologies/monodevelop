@@ -930,11 +930,7 @@ namespace MonoDevelop.Projects.Formats.MSBuild
 				bool isDefaultVersion = isDefaultIdentifier && def.Version == moniker.Version;
 				bool isDefaultProfile = isDefaultVersion && def.Profile == moniker.Profile;
 
-				// If the format only supports one fx version, or the version is the default, there is no need to store it
-				if (!isDefaultVersion && supportsMultipleFrameworks)
-					SetGroupProperty (globalGroup, "TargetFrameworkVersion", "v" + moniker.Version, false);
-				else
-					globalGroup.RemoveProperty ("TargetFrameworkVersion");
+				SetGroupProperty (globalGroup, "TargetFrameworkVersion", "v" + moniker.Version, false);
 				
 				if (TargetFormat.SupportsMonikers) {
 					if (!isDefaultIdentifier && def.Identifier != moniker.Identifier)
