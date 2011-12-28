@@ -295,8 +295,20 @@ namespace MonoDevelop.Ide
 				Initialized += onInit;
 				return;
 			}
-			
-			var filteredFiles = files.Where (f => !(Services.ProjectService.IsWorkspaceItemFile (f.FileName) || Services.ProjectService.IsSolutionItemFile (f.FileName)));
+
+			if (Workspace.IsLoading)
+			{
+				EventHandler<WorkspaceItemEventArgs> onLoad = null;
+				onLoad = delegate
+				{
+					Workspace.WorkspaceItemLoaded -= onLoad;
+					OpenFiles(files);
+				};
+				Workspace.WorkspaceItemLoaded += onLoad;
+				return;
+			}
+
+			var filteredFiles = files.Where(f => !(Services.ProjectService.IsWorkspaceItemFile(f.FileName) || Services.ProjectService.IsSolutionItemFile(f.FileName)));
 			EventHandler<WorkspaceItemEventArgs> loadFilteredFiles =  null;
 			loadFilteredFiles = delegate {
 				foreach (var afile in filteredFiles)
