@@ -924,7 +924,6 @@ namespace MonoDevelop.Projects.Formats.MSBuild
 		
 			if (dotNetProject != null) {
 				var moniker = dotNetProject.TargetFramework.Id;
-				bool supportsMultipleFrameworks = TargetFormat.FrameworkVersions.Length > 0;
 				var def = dotNetProject.GetDefaultTargetFrameworkForFormat (GetFileFormat ());
 				bool isDefaultIdentifier = def.Identifier == moniker.Identifier;
 				bool isDefaultVersion = isDefaultIdentifier && def.Version == moniker.Version;
