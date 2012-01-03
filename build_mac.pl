@@ -69,14 +69,14 @@ sub prepare_sources {
 sub build_monodevelop {
 	chdir "$root/monodevelop";
 	system("./configure --profile=mac");
-	system("make");
+	system("make") && die("Failed building MonoDevelop");
 	mkpath("main/build/bin/branding");
 	copy("branding/Branding.xml", "main/build/bin/branding/Branding.xml");
 }
 
 sub build_debugger {
 	chdir "$root/MonoDevelop.Debugger.Soft.Unity";
-	system("xbuild /property:Configuration=Release /t:Rebuild");
+	system("xbuild /property:Configuration=Release /t:Rebuild") && die("Failed building Unity debugger addin");
 }
 
 sub finalize_monodevelop {
