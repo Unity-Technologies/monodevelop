@@ -308,9 +308,14 @@ namespace MonoDevelop.Ide
 				return;
 			}
 
+			IAsyncOperation workspaceLoading = null;
 			var filteredFiles = files.Where(f => !(Services.ProjectService.IsWorkspaceItemFile(f.FileName) || Services.ProjectService.IsSolutionItemFile(f.FileName)));
+			
 			EventHandler<WorkspaceItemEventArgs> loadFilteredFiles =  null;
 			loadFilteredFiles = delegate {
+				if (workspaceLoading != null && filteredFiles.Any (f => f.Options.HasFlag (OpenDocumentOptions.BringToFront)))
+					workspaceLoading.WaitForCompleted ();
+
 				foreach (var afile in filteredFiles)
 				{
 					try
@@ -330,31 +335,26 @@ namespace MonoDevelop.Ide
 			
 			//open the firsts sln/workspace file, and remove the others from the list
 		 	//FIXME: can we handle multiple slns?
-			bool foundSln = false;
-
 			foreach (var file in files) {
 				if (Services.ProjectService.IsWorkspaceItemFile (file.FileName) ||
 				    Services.ProjectService.IsSolutionItemFile (file.FileName)) {
 					// Don't reload the currently open solution
 					if (null != Workspace.Items.FirstOrDefault (x =>
 					    (x.FileName.FullPath.ToString ().Equals(file.FileName, StringComparison.OrdinalIgnoreCase) && !x.NeedsReload))) {
-						loadFilteredFiles (null, null);
-						foundSln = true;
+						break;
 					}
 					
-					if (!foundSln) {
-						try {
-							Workspace.OpenWorkspaceItem (file.FileName);
-							foundSln = true;
-						} catch (Exception ex) {
-							LoggingService.LogError ("Unhandled error opening solution/workspace \"" + file.FileName + "\"", ex);
-							MessageService.ShowException (ex, "Could not load solution: " + file.FileName);
-						}
+					try {
+						workspaceLoading = Workspace.OpenWorkspaceItem (file.FileName);
+						break;
+					} catch (Exception ex) {
+						LoggingService.LogError ("Unhandled error opening solution/workspace \"" + file.FileName + "\"", ex);
+						MessageService.ShowException (ex, "Could not load solution: " + file.FileName);
 					}
 				}
 			}
 
-			if (!(foundSln || Workspace.IsLoading))
+			if (!Workspace.IsLoading)
 				loadFilteredFiles (null, null);
 			
 			Workbench.Present ();
