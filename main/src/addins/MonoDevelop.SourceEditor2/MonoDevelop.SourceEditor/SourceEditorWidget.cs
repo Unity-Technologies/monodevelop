@@ -863,12 +863,16 @@ namespace MonoDevelop.SourceEditor
 				b1.Image = ImageService.GetImage (Gtk.Stock.Refresh, IconSize.Button);
 				b1.Clicked += delegate {
 					try {
-						AutoSave.RemoveAutoSaveFile (fileName);
+						try {
+							AutoSave.RemoveAutoSaveFile (fileName);
+						} catch (Exception ex) {
+							MessageService.ShowException(ex, "Could not remove the autosave file.");
+						}
 						TextEditor.GrabFocus ();
 						view.Load (fileName);
 						view.WorkbenchWindow.Document.UpdateParseDocument ();
-					} catch (Exception ex) {
-						MessageService.ShowException (ex, "Could not remove the autosave file.");
+					} catch (Exception outer) {
+						LoggingService.LogError ("Error discarding autosave", outer);
 					} finally {
 						RemoveMessageBar ();
 					}
@@ -879,14 +883,24 @@ namespace MonoDevelop.SourceEditor
 				b2.Image = ImageService.GetImage (Gtk.Stock.RevertToSaved, IconSize.Button);
 				b2.Clicked += delegate {
 					try {
-						string content = AutoSave.LoadAutoSave (fileName);
-						AutoSave.RemoveAutoSaveFile (fileName);
+						string content = null;
+						try {
+							content = AutoSave.LoadAutoSave (fileName);
+							AutoSave.RemoveAutoSaveFile(fileName);
+						} catch (Exception ex) {
+							MessageService.ShowException (ex, "Could not load the autosave file.");
+							return;
+						}
 						TextEditor.GrabFocus ();
-						view.Load (fileName, content, null);
+						if (content == null) {
+							view.Load (fileName);
+						} else {
+							view.Load (fileName, content, null);
+							view.IsDirty = true;
+						}
 						view.WorkbenchWindow.Document.UpdateParseDocument ();
-						view.IsDirty = true;
-					} catch (Exception ex) {
-						MessageService.ShowException (ex, "Could not remove the autosave file.");
+					} catch (Exception outer) {
+						LoggingService.LogError ("Error loading autosave", outer);
 					} finally {
 						RemoveMessageBar ();
 					}

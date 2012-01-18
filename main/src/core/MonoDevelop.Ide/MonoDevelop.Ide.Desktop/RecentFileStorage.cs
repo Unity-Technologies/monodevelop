@@ -254,8 +254,9 @@ namespace MonoDevelop.Ide.Desktop
 			items.Sort ();
 			if (items.Count > MaxRecentItemsCount)
 				items.RemoveRange (MaxRecentItemsCount, items.Count - MaxRecentItemsCount);
-			var writer = new XmlTextWriter (filePath, utf8WithoutByteOrderMark);
+			XmlTextWriter writer = null;
 			try {
+				writer = new XmlTextWriter (filePath, utf8WithoutByteOrderMark);
 				writer.Formatting = Formatting.Indented;
 				writer.WriteStartDocument ();
 				writer.WriteStartElement ("RecentFiles");
@@ -263,8 +264,11 @@ namespace MonoDevelop.Ide.Desktop
 					foreach (RecentItem item in items)
 						item.Write (writer);
 				writer.WriteEndElement (); // RecentFiles
+			} catch (Exception e) {
+				MonoDevelop.Core.LoggingService.LogError ("Exception while writing the store", e);
 			} finally {
-				writer.Close ();
+				if (writer != null)
+					writer.Close ();
 				OnRecentFilesChanged (EventArgs.Empty);
 			}
 		}

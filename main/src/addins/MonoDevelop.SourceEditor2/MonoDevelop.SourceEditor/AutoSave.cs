@@ -68,7 +68,7 @@ namespace MonoDevelop.SourceEditor
 			try {
 				return File.Exists (GetAutoSaveFileName (fileName));
 			} catch (Exception e) {
-				LoggingService.LogError ("Error in auto save - disableing.", e);
+				LoggingService.LogError ("Error in auto save - disabling.", e);
 				DisableAutoSave ();
 				return false;
 			}
@@ -83,7 +83,7 @@ namespace MonoDevelop.SourceEditor
 				File.WriteAllText (GetAutoSaveFileName (fileName), content);
 				Counters.AutoSavedFiles++;
 			} catch (Exception e) {
-				LoggingService.LogError ("Error in auto save while creating: " + fileName +". Disableing auto save.", e);
+				LoggingService.LogError ("Error in auto save while creating: " + fileName +". Disabling auto save.", e);
 				DisableAutoSave ();
 			}
 		}
@@ -147,22 +147,32 @@ namespace MonoDevelop.SourceEditor
 		public static string LoadAutoSave (string fileName)
 		{
 			string autoSaveFileName = GetAutoSaveFileName (fileName);
-			return File.ReadAllText (autoSaveFileName);
+			lock (contentLock)
+			{
+				try {
+					return File.ReadAllText (autoSaveFileName);
+				} catch (Exception e) {
+					LoggingService.LogError ("Error loading autosave from " + autoSaveFileName, e);
+				}
+			}
+
+			return string.Empty;
 		}
 
 		public static void RemoveAutoSaveFile (string fileName)
 		{
 			if (!autoSaveEnabled)
 				return;
-			if (AutoSaveExists (fileName)) {
-				string autoSaveFileName = GetAutoSaveFileName (fileName);
-				try {
-					lock (contentLock) {
-						File.Delete (autoSaveFileName);
+			
+			lock (contentLock) {
+				if (AutoSaveExists (fileName)) {
+					string autoSaveFileName = GetAutoSaveFileName (fileName);
+					try {
+							File.Delete (autoSaveFileName);
+					} catch (Exception e) {
+						LoggingService.LogError ("Can't delete auto save file: " + autoSaveFileName +". Disabling auto save.", e);
+						DisableAutoSave ();
 					}
-				} catch (Exception e) {
-					LoggingService.LogError ("Can't delete auto save file: " + autoSaveFileName +". Disableing auto save.", e);
-					DisableAutoSave ();
 				}
 			}
 		}
