@@ -598,33 +598,49 @@ namespace MonoDevelop.Ide.Gui
 		{
 			IWorkbenchWindow window = (IWorkbenchWindow) sender;
 			if (!args.Forced && window.ViewContent != null && window.ViewContent.IsDirty) {
-				AlertButton result = MessageService.GenericAlert (Stock.Warning,
-					GettextCatalog.GetString ("Save the changes to document '{0}' before closing?",
-						window.ViewContent.IsUntitled
-							? window.ViewContent.UntitledName
-							: System.IO.Path.GetFileName (window.ViewContent.ContentName)), 
-				    GettextCatalog.GetString ("If you don't save, all changes will be permanently lost."),
-				    AlertButton.CloseWithoutSave, AlertButton.Cancel, window.ViewContent.IsUntitled ? AlertButton.SaveAs : AlertButton.Save);
-				if (result == AlertButton.Save || result == AlertButton.SaveAs) {
-					if (window.ViewContent.ContentName == null) {
-						FindDocument (window).Save ();
-						args.Cancel = window.ViewContent.IsDirty;
+				// This path can be reentered if something else tries to close the window
+				// before the user responds to the "Save changes?" dialog.
+				// This results in a stack of "Save changes?" dialogs, and unpredictable behavior 
+				// when responding to all but the first.
+				// The Right Fix would be to make it impossible for this to happen.
+				// For now, we work around by replacing the OnClosing handler 
+				// until we get an answer back from the user.
+				WorkbenchWindowEventHandler dummyClosing = (aSender,someArgs) => { someArgs.Cancel = true; };
+				window.Closing -= OnWindowClosing;
+				window.Closing += dummyClosing;
+
+				try {
+					AlertButton result = MessageService.GenericAlert (Stock.Warning,
+						GettextCatalog.GetString ("Save the changes to document '{0}' before closing?",
+							window.ViewContent.IsUntitled
+								? window.ViewContent.UntitledName
+								: System.IO.Path.GetFileName (window.ViewContent.ContentName)), 
+						GettextCatalog.GetString ("If you don't save, all changes will be permanently lost."),
+						AlertButton.CloseWithoutSave, AlertButton.Cancel, window.ViewContent.IsUntitled ? AlertButton.SaveAs : AlertButton.Save);
+					if (result == AlertButton.Save || result == AlertButton.SaveAs) {
+						if (window.ViewContent.ContentName == null) {
+							FindDocument (window).Save ();
+							args.Cancel = window.ViewContent.IsDirty;
+						} else {
+							try {
+								if (window.ViewContent.IsFile)
+									window.ViewContent.Save (window.ViewContent.ContentName);
+								else
+									window.ViewContent.Save ();
+							}
+							catch (Exception ex) {
+								args.Cancel = true;
+								MessageService.ShowException (ex, GettextCatalog.GetString ("The document could not be saved."));
+							}
+						}
 					} else {
-						try {
-							if (window.ViewContent.IsFile)
-								window.ViewContent.Save (window.ViewContent.ContentName);
-							else
-								window.ViewContent.Save ();
-						}
-						catch (Exception ex) {
-							args.Cancel = true;
-							MessageService.ShowException (ex, GettextCatalog.GetString ("The document could not be saved."));
-						}
+						args.Cancel = result != AlertButton.CloseWithoutSave;
+						if (!args.Cancel)
+							window.ViewContent.DiscardChanges ();
 					}
-				} else {
-					args.Cancel = result != AlertButton.CloseWithoutSave;
-					if (!args.Cancel)
-						window.ViewContent.DiscardChanges ();
+				} finally {
+					window.Closing -= dummyClosing;
+					window.Closing += OnWindowClosing;
 				}
 			}
 		}
