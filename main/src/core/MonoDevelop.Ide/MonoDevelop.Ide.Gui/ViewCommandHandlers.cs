@@ -103,7 +103,18 @@ namespace MonoDevelop.Ide.Gui
 		{
 			info.Enabled = window.ViewContent.ContentName != null && !window.ViewContent.IsViewOnly;
 		}
-		
+
+		[CommandHandler (FileCommands.OpenContainingFolder)]
+		protected void OnOpenContainingFolder ()
+		{
+			DesktopService.OpenFolder (doc.FileName.ParentDirectory);
+		}
+
+		[CommandUpdateHandler (FileCommands.OpenContainingFolder)]
+		protected void OnUpdateOpenContainingFolder (CommandInfo info)
+		{
+			info.Enabled = info.Visible = (doc.IsFile && File.Exists (doc.FileName.FullPath));
+		}
 		
 		/*** Edit commands ***/
 		

@@ -87,6 +87,15 @@ namespace MonoDevelop.VersionControl
 				path = file.Path;
 				isDir = false;
 				pentry = file.ParentWorkspaceObject;
+			} else if (obj is IWorkspaceFileObject) {
+				// Force the lowest common root path for workspace items
+				// with children - this allows committing from a project
+				// that has source files linked from outside the project's
+				// base directory
+				pentry = (IWorkspaceObject)obj;
+				var itemFiles = ((IWorkspaceFileObject)pentry).GetItemFiles (true);
+				path = MonoDevelop.Core.FilePath.GetCommonRootPath (itemFiles);
+				isDir = (System.IO.Directory.Exists(path));
 			} else if (obj is ProjectFolder) {
 				ProjectFolder f = ((ProjectFolder)obj);
 				path = f.Path;

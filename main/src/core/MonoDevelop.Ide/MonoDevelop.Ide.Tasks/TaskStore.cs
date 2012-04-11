@@ -397,6 +397,8 @@ namespace MonoDevelop.Ide.Tasks
 				n = IndexOfTask (currentLocationTask);
 				if (n != -1)
 					n++;
+				if (n >= tasks.Count)
+					n = 0;
 			}
 			
 			// Jump over tasks with different severity or with no file name
@@ -455,6 +457,8 @@ namespace MonoDevelop.Ide.Tasks
 				n = IndexOfTask (currentLocationTask);
 				if (n != -1)
 					n--;
+				if (0 > n)
+					n = tasks.Count - 1;
 			}
 			
 			while (n != -1 && n < tasks.Count && (iteratingSeverity != tasks [n].Severity || string.IsNullOrEmpty (tasks [n].FileName)))

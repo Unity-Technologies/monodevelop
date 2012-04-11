@@ -35,5 +35,23 @@ namespace Mono.Debugger.Soft
 			if (vm != m.VirtualMachine)
 				throw new VMMismatchException ();
 		}
+
+		public override bool Equals(object obj)
+		{
+			if (obj is Mirror) {
+				var mirror = obj as Mirror;
+				return (
+					null != mirror &&
+					id == mirror.Id &&
+					vm == mirror.VirtualMachine
+				);
+			}
+			return false;
+		}
+
+		public override int GetHashCode()
+		{
+			return (int)id;
+		}
 	}
 }

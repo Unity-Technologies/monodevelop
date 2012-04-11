@@ -280,12 +280,23 @@ namespace MonoDevelop.Ide
 			AutoTestService.NotifyEvent ("MonoDevelop.Ide.IdeStart");
 		}
 		
+		// Lets us wait on previous workspace loads from OpenFiles
+		static IAsyncOperation workspaceLoading = null;
+		
+		// Waits on a pending workspace load if any files request bring-to-front
+		static void WaitForWorkspaceLoadIfBringingFilesToFront (IEnumerable<FileOpenInformation> files)
+		{
+			if (workspaceLoading != null && files.Any (f => f.Options.HasFlag (OpenDocumentOptions.BringToFront))) {
+				workspaceLoading.WaitForCompleted ();
+				workspaceLoading = null;
+			}
+		}
+			
 		//this method is MIT/X11, 2009, Michael Hutchinson / (c) Novell
 		public static void OpenFiles (IEnumerable<FileOpenInformation> files)
 		{
 			if (files.Count() == 0)
 				return;
-			
 			if (!IsInitialized) {
 				EventHandler onInit = null;
 				onInit = delegate {
@@ -295,6 +306,8 @@ namespace MonoDevelop.Ide
 				Initialized += onInit;
 				return;
 			}
+			
+			WaitForWorkspaceLoadIfBringingFilesToFront (files);
 
 			if (Workspace.IsLoading)
 			{
@@ -308,13 +321,11 @@ namespace MonoDevelop.Ide
 				return;
 			}
 
-			IAsyncOperation workspaceLoading = null;
 			var filteredFiles = files.Where(f => !(Services.ProjectService.IsWorkspaceItemFile(f.FileName) || Services.ProjectService.IsSolutionItemFile(f.FileName)));
 			
 			EventHandler<WorkspaceItemEventArgs> loadFilteredFiles =  null;
 			loadFilteredFiles = delegate {
-				if (workspaceLoading != null && filteredFiles.Any (f => f.Options.HasFlag (OpenDocumentOptions.BringToFront)))
-					workspaceLoading.WaitForCompleted ();
+				WaitForWorkspaceLoadIfBringingFilesToFront (filteredFiles);
 
 				foreach (var afile in filteredFiles)
 				{

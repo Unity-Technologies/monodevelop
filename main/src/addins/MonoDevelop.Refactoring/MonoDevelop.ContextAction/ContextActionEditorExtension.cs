@@ -81,7 +81,7 @@ namespace MonoDevelop.ContextAction
 		{
 			RemoveWidget ();
 			
-			if (Document.ParsedDocument != null) {
+			if (Document.ParsedDocument != null && Document.Editor != null && Document.Editor.Caret != null) {
 				DomLocation loc = new DomLocation (Document.Editor.Caret.Line, Document.Editor.Caret.Column);
 				RefactoringService.QueueQuickFixAnalysis (Document, loc, delegate(List<ContextAction> fixes) {
 					Application.Invoke (delegate {

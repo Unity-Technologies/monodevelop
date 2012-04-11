@@ -71,5 +71,11 @@ namespace MonoDevelop.Ide.Commands
 			clipboard = Clipboard.Get (Gdk.Atom.Intern ("PRIMARY", false));
 			clipboard.Text = document.FileName;
 		}
+
+		protected override void Update(CommandInfo info)
+		{
+			Document document = IdeApp.Workbench.ActiveDocument;
+			info.Visible = info.Enabled = (document != null && document.IsFile && !string.IsNullOrEmpty (document.FileName));
+		}
 	}
 }

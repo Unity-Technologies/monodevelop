@@ -19,6 +19,7 @@ sub main {
 	prepare_sources();
 	build_monodevelop();
 	build_debugger();
+	build_monodevelop_hg();
 	finalize_monodevelop();
 	build_boo();
 	build_boo_extensions();
@@ -55,11 +56,14 @@ sub prepare_sources {
 		printf ("Pulling laest boo-md-addins . . .\n");
 		chdir "$root/boo-md-addins";
 		system ("git pull") && die ("failed to update boo-md-addins");
+		chdir "$root/monodevelop-hg";
+		system ("hg pull --update") && die ("failed to update monodevelop-hg");
 	}
 	chdir $root;
 
 	# Check sources
 	die ("Must grab Unity MonoDevelop Soft Debugger source from github first") if !-d "MonoDevelop.Debugger.Soft.Unity";
+	die ("Must grab monodevelop-hg source from bitbucket first") if !-d "monodevelop-hg";
 	die ("Must grab Boo implementation") if !-d "boo";
 	die ("Must grab Boo extensions") if !-d "boo-extensions";
 	die ("Must grab Boo MD addins implementation") if !-d "boo-md-addins";
@@ -79,6 +83,11 @@ sub build_debugger {
 	system("xbuild /property:Configuration=Release /t:Rebuild") && die("Failed building Unity debugger addin");
 }
 
+sub build_monodevelop_hg {
+	chdir "$root/monodevelop-hg/monodevelop-hg";
+	system("xbuild /property:Configuration=Release /t:Rebuild") && die("Failed building monodevelop-hg");
+}
+
 sub finalize_monodevelop {
 	chdir $root;
 	rmtree "tmp";
@@ -90,6 +99,11 @@ sub finalize_monodevelop {
 	# Unity soft debugger
 	mkpath "$mdRoot/AddIns/MonoDevelop.Debugger.Soft.Unity";
 	copy "$root/MonoDevelop.Debugger.Soft.Unity/obj/Release/MonoDevelop.Debugger.Soft.Unity.dll", "$mdRoot/AddIns/MonoDevelop.Debugger.Soft.Unity" or die ("Failed to copy MonoDevelop.Debugger.Soft.Unity");	
+	# Unity utilities
+	copy "$root/MonoDevelop.Debugger.Soft.Unity/obj/Release/UnityUtilities.dll", "$mdRoot/AddIns" or die ("Failed to copy UnityUtilities");	
+	# monodevelop-hg
+	copy "$root/monodevelop-hg/monodevelop-hg/bin/Release/MonoDevelop.VersionControl.Mercurial.dll", "$mdRoot/AddIns/VersionControl" or die ("Failed to copy monodevelop-hg");	
+	copy "$root/monodevelop-hg/monodevelop-hg/bin/Release/Mercurial.dll", "$mdRoot/AddIns/VersionControl" or die ("Failed to copy monodevelop-hg");	
 }
 
 sub build_boo {

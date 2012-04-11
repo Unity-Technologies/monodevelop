@@ -256,6 +256,10 @@ namespace MonoDevelop.Ide.Desktop
 				items.RemoveRange (MaxRecentItemsCount, items.Count - MaxRecentItemsCount);
 			XmlTextWriter writer = null;
 			try {
+				// Force creation of store path
+				if (!Directory.Exists(Path.GetDirectoryName(filePath)))
+					Directory.CreateDirectory(filePath);
+
 				writer = new XmlTextWriter (filePath, utf8WithoutByteOrderMark);
 				writer.Formatting = Formatting.Indented;
 				writer.WriteStartDocument ();

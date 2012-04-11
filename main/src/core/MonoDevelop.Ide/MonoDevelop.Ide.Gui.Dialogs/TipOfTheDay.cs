@@ -26,12 +26,16 @@ namespace MonoDevelop.Ide.Gui.Dialogs
             }
 
             XmlDocument xmlDocument = new XmlDocument ();
-            xmlDocument.Load (System.IO.Path.Combine (System.IO.Path.Combine (PropertyService.DataPath, "options"), "TipsOfTheDay.xml"));
-
-            foreach (XmlNode xmlNode in xmlDocument.DocumentElement.ChildNodes) {
-                tips.Add (StringParserService.Parse (xmlNode.InnerText));
+            try {
+                xmlDocument.Load (System.IO.Path.Combine (System.IO.Path.Combine (PropertyService.DataPath, "options"), "TipsOfTheDay.xml"));
+                foreach (XmlNode xmlNode in xmlDocument.DocumentElement.ChildNodes)
+                {
+                    tips.Add(StringParserService.Parse(xmlNode.InnerText));
+                }
+            } catch (Exception ex) {
+                LoggingService.LogError ("Error loading tips", ex);
             }
-           
+
             if (tips.Count != 0) 
                 currentTip = new Random ().Next () % tips.Count;
             else

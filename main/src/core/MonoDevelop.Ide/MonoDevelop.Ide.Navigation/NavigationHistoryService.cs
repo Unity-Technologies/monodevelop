@@ -270,8 +270,10 @@ namespace MonoDevelop.Ide.Navigation
 			
 			currentDoc.Closed -= HandleCurrentDocClosed;
 			if (currentDoc.Editor != null) {
-				currentDoc.Editor.Document.TextReplaced -= BufferTextChanged;
-				currentDoc.Editor.Caret.PositionChanged -= BufferCaretPositionChanged;
+				if (currentDoc.Editor.Document != null)
+					currentDoc.Editor.Document.TextReplaced -= BufferTextChanged;
+				if (currentDoc.Editor.Caret != null)
+					currentDoc.Editor.Caret.PositionChanged -= BufferCaretPositionChanged;
 			}
 			currentDoc = null;
 		}

@@ -17,6 +17,26 @@ namespace Mono.Debugger.Soft
 		AppDomainMirror root_domain;
 		Dictionary<int, EventRequest> requests;
 		ITargetProcess process;
+		public static readonly Dictionary<EventType,SuspendPolicy> EventPolicies = new Dictionary<EventType,SuspendPolicy> () {
+			{ EventType.AppDomainCreate, SuspendPolicy.All },
+			{ EventType.AppDomainUnload, SuspendPolicy.All },
+			{ EventType.AssemblyLoad, SuspendPolicy.All },
+			{ EventType.AssemblyUnload, SuspendPolicy.All },
+			{ EventType.Breakpoint, SuspendPolicy.All },
+			{ EventType.Exception, SuspendPolicy.All },
+			{ EventType.KeepAlive, SuspendPolicy.None },
+			{ EventType.MethodEntry, SuspendPolicy.None },
+			{ EventType.MethodExit, SuspendPolicy.None },
+			{ EventType.Step, SuspendPolicy.All },
+			{ EventType.ThreadDeath, SuspendPolicy.None },
+			{ EventType.ThreadStart, SuspendPolicy.None },
+			{ EventType.TypeLoad, SuspendPolicy.All },
+			{ EventType.UserBreak, SuspendPolicy.All },
+			{ EventType.UserLog, SuspendPolicy.None },
+			{ EventType.VMDeath, SuspendPolicy.None },
+			{ EventType.VMDisconnect, SuspendPolicy.None },
+			{ EventType.VMStart, SuspendPolicy.None },
+		};
 
 		internal Connection conn;
 
@@ -219,7 +239,7 @@ namespace Mono.Debugger.Soft
 			foreach (EventType etype in events) {
 				if (etype == EventType.Breakpoint)
 					throw new ArgumentException ("Breakpoint events cannot be requested using EnableEvents", "events");
-				conn.EnableEvent (etype, SuspendPolicy.All, null);
+				conn.EnableEvent (etype, EventPolicies[etype], null);
 			}
 		}
 
@@ -286,6 +306,8 @@ namespace Mono.Debugger.Soft
 				throw new AbsentInformationException ();
 			case ErrorCode.NO_SEQ_POINT_AT_IL_OFFSET:
 				throw new ArgumentException ("Cannot set breakpoint on the specified IL offset.");
+			case ErrorCode.ERR_UNLOADED:
+				throw new AppDomainUnloadedException ("The requested item has been unloaded.");
 			default:
 				throw new CommandException (args.ErrorCode);
 			}

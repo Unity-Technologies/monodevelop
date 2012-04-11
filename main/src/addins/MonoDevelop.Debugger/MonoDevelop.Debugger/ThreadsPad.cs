@@ -151,6 +151,8 @@ namespace MonoDevelop.Debugger
 						AppendThreads (it, p);
 					}
 				}
+			} catch (InvalidOperationException ioe) {
+				LoggingService.LogError (ioe.Message, ioe);
 			} catch (Exception ex) {
 				MessageService.ShowException (ex);
 			}

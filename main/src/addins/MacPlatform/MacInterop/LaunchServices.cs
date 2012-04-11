@@ -116,6 +116,23 @@ namespace MonoDevelop.MacInterop
 			return psn;
 		}
 		
+		[DllImport (APP_SERVICES)]
+		static extern OSStatus LSGetApplicationForURL (IntPtr inURL, RolesMask inRoleMask, out FSRef outAppRef, out IntPtr outAppURL);
+		
+		public static string GetApplicationForUrl (string url)
+		{
+			NSUrl nsurl = new NSUrl (url);
+			IntPtr outUrl;
+			FSRef application;
+			OSStatus status = LSGetApplicationForURL (nsurl.Handle, RolesMask.All, out application, out outUrl);
+			NSUrl realOutUrl = new NSUrl (outUrl);
+			
+			if (status != OSStatus.Ok) // Do something here!
+				return null;
+				
+			return realOutUrl.Path;
+		}
+		
 		struct LSApplicationParameters
 		{
 			public IntPtr version; // CFIndex, must be 0
@@ -144,6 +161,15 @@ namespace MonoDevelop.MacInterop
 			AndHide = 0x00100000,
 			AndHideOthers = 0x00200000,
 			HasUntrustedContents = 0x00400000
+		}
+		
+		[Flags]
+		public enum RolesMask: int {
+			None = 0x1,
+			Viewer = 0x2,
+			Editor = 0x4,
+			Shell = 0x8,
+			All = -1
 		}
 		
 		static class CoreFoundation
