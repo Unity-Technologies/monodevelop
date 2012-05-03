@@ -17,7 +17,7 @@ namespace Mono.Debugger.Soft
 		AppDomainMirror root_domain;
 		Dictionary<int, EventRequest> requests;
 		ITargetProcess process;
-		public static readonly Dictionary<EventType,SuspendPolicy> EventPolicies = new Dictionary<EventType,SuspendPolicy> () {
+		internal static readonly Dictionary<EventType,SuspendPolicy> EventPolicies = new Dictionary<EventType,SuspendPolicy> () {
 			{ EventType.AppDomainCreate, SuspendPolicy.All },
 			{ EventType.AppDomainUnload, SuspendPolicy.All },
 			{ EventType.AssemblyLoad, SuspendPolicy.All },

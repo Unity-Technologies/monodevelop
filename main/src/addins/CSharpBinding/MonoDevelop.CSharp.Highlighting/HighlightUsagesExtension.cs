@@ -35,6 +35,7 @@ using MonoDevelop.CSharp.Resolver;
 using MonoDevelop.Projects.Text;
 using System.Linq;
 using MonoDevelop.Core;
+using MonoDevelop.Ide;
 
 namespace MonoDevelop.CSharp.Highlighting
 {
@@ -139,21 +140,33 @@ namespace MonoDevelop.CSharp.Highlighting
 				var resolveResult = textEditorResolver.GetLanguageItem (caretOffset, expression);
 				if (resolveResult == null)
 					return false;
-				if (resolveResult is AggregatedResolveResult) {
-					foreach (var curResult in ((AggregatedResolveResult)resolveResult).ResolveResults) {
-						var references = GetReferences (curResult);
-						if (references.Any (r => r.Position <= caretOffset && caretOffset <= r.Position  + r.Name.Length )) {
-							ShowReferences (references);
-							break;
+					
+				DispatchService.BackgroundDispatch (() => {
+					try {
+						if (resolveResult is AggregatedResolveResult) {
+							foreach (var curResult in ((AggregatedResolveResult)resolveResult).ResolveResults) {
+								var references = GetReferences (curResult);
+								if (references.Any (r => r.Position <= caretOffset && caretOffset <= r.Position  + r.Name.Length )) {
+									if (0 != popupTimer)
+										DispatchService.GuiDispatch (() => ShowReferences (references));
+									break;
+								}
+								if (0 == popupTimer)
+									break;
+							}
+						} else {
+							var references = GetReferences (resolveResult);
+							if (0 != popupTimer)
+								DispatchService.GuiDispatch (() => ShowReferences (references));
 						}
+					} catch (Exception e) {
+						LoggingService.LogError ("Unhandled Exception in HighlightingUsagesExtension", e);
+					} finally {
+						popupTimer = 0;
 					}
-				} else {
-					ShowReferences (GetReferences (resolveResult));
-				}
+				});
 			} catch (Exception e) {
 				LoggingService.LogError ("Unhandled Exception in HighlightingUsagesExtension", e);
-			} finally {
-				popupTimer = 0;
 			}
 			return false;
 		}

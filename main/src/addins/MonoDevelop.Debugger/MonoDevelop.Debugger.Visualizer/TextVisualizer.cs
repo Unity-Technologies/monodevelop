@@ -78,7 +78,11 @@ namespace MonoDevelop.Debugger.Visualizer
 		
 		public bool StoreValue (ObjectValue val)
 		{
-			val.SetRawValue (textView.Buffer.Text);
+			try {
+				val.SetRawValue (textView.Buffer.Text);
+			} catch {
+				MonoDevelop.Ide.MessageService.ShowError ("Unable to set text");
+			}
 			return true;
 		}
 		

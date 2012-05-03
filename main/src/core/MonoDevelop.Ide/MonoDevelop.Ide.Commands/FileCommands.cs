@@ -213,6 +213,7 @@ namespace MonoDevelop.Ide.Commands
 		
 		internal static bool CanPrint ()
 		{
+			return false; // Unity
 			IPrintable print;
 			return IdeApp.Workbench.ActiveDocument != null
 				&& (print = IdeApp.Workbench.ActiveDocument.GetContent<IPrintable> ()) != null

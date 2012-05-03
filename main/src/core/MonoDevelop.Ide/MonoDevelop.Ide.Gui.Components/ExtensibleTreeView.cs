@@ -91,6 +91,8 @@ namespace MonoDevelop.Ide.Gui.Components
 		int updateLockCount;
 		string contextMenuPath;
 		IDictionary<string,string> contextMenuTypeNameAliases;
+		Dictionary<Gtk.TreeIter,NodeState> states;
+		bool isRestoring;
 		
 		private static Gtk.TargetEntry [] target_table = new Gtk.TargetEntry [] {
 			new Gtk.TargetEntry ("text/uri-list", 0, 11 ),
@@ -125,6 +127,7 @@ namespace MonoDevelop.Ide.Gui.Components
 		
 		public ExtensibleTreeView ()
 		{
+			states = new Dictionary<Gtk.TreeIter,NodeState> ();
 		}
 		
 		public ExtensibleTreeView (NodeBuilder[] builders, TreePadOption[] options)
@@ -166,6 +169,7 @@ namespace MonoDevelop.Ide.Gui.Components
 		{
 			this.contextMenuPath = contextMenuPath;
 			builderContext = new TreeBuilderContext (this);
+			states = new Dictionary<Gtk.TreeIter,NodeState> ();
 
 			SetBuilders (builders, options);
 			/*
@@ -219,7 +223,9 @@ namespace MonoDevelop.Ide.Gui.Components
 			tree.AppendColumn (complete_column);
 			
 			tree.TestExpandRow += OnTestExpandRow;
+			tree.TestCollapseRow += HandleTestCollapseRow;
 			tree.RowActivated += OnNodeActivated;
+			tree.RowExpanded += HandleTreeRowExpanded;
 			
 			tree.ButtonReleaseEvent += OnButtonRelease;
 			tree.ButtonPressEvent += OnButtonPress;
@@ -252,6 +258,28 @@ namespace MonoDevelop.Ide.Gui.Components
 #if TREE_VERIFY_INTEGRITY
 			GLib.Timeout.Add (3000, Checker);
 #endif
+		}
+
+		void HandleTestCollapseRow (object o, Gtk.TestCollapseRowArgs args)
+		{
+			ITreeNavigator node = GetNodeAtIter (args.Iter);
+			states[args.Iter] = node.SaveState ();
+		}
+
+		void HandleTreeRowExpanded (object o, Gtk.RowExpandedArgs args)
+		{
+			if (isRestoring)
+				return; // stack overflows are bad
+			
+			try {
+				isRestoring = true;
+				ITreeNavigator node = GetNodeAtIter (args.Iter);
+				
+				if (states.ContainsKey (args.Iter))
+					node.RestoreState (states[args.Iter]);
+			} finally {
+				isRestoring = false;
+			}
 		}
 	
 #if TREE_VERIFY_INTEGRITY
@@ -668,9 +696,14 @@ namespace MonoDevelop.Ide.Gui.Components
 			return navs;
 		}
 
+		public ITreeNavigator GetNodeAtIter (Gtk.TreeIter iter)
+		{
+			return new TreeNodeNavigator (this, iter);
+		}
+		
 		public ITreeNavigator GetNodeAtPosition (NodePosition position)
 		{
-			return new TreeNodeNavigator (this, position._iter);
+			return GetNodeAtIter (position._iter);
 		}
 		
 		public ITreeNavigator GetNodeAtObject (object dataObject)

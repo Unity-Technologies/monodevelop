@@ -109,7 +109,7 @@
 				_label = "Toggle code focus"
 				_description = "Activates code focus on caret move"
 				shortcut = "Ctrl|Shift|k"
-				macShortcut = "Meta|Shift|k" />
+				macShortcut = "Alt|Shift|k" />
 				
 		<Command id = "MonoDevelop.SourceEditor.NavigationBarCommands.ToggleNavPanelViews"
 				defaultHandler = "MonoDevelop.SourceEditor.ToggleNavPanelViewsHandler"

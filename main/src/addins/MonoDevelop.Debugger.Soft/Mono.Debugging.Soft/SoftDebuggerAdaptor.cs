@@ -189,9 +189,17 @@ namespace Mono.Debugging.Soft
 
 		public override object CreateValue (EvaluationContext ctx, object value)
 		{
+			return CreateValue (ctx, value, null);
+		}
+
+		internal object CreateValue (EvaluationContext ctx, object value, AppDomainMirror domain)
+		{
 			SoftEvaluationContext cx = (SoftEvaluationContext) ctx;
-			if (value is string)
-				return cx.Thread.Domain.CreateString ((string)value);
+			if (value is string) {
+				if (null == domain)
+					domain = cx.Thread.Domain;
+				return domain.CreateString ((string)value);
+			}
 			else
 				return cx.Session.VirtualMachine.CreateValue (value);
 		}

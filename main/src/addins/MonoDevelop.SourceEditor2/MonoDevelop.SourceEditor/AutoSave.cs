@@ -192,12 +192,12 @@ namespace MonoDevelop.SourceEditor
 		public static void DisableAutoSave ()
 		{
 			autoSaveThreadRunning = false;
+			autoSaveEnabled = false;
 			if (autoSaveThread != null) {
 				resetEvent.Set ();
 				autoSaveThread.Join ();
 				autoSaveThread = null;
 			}
-			autoSaveEnabled = false;
 		}
 #endregion
 	}

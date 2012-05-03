@@ -952,7 +952,7 @@ namespace Mono.Debugging.Soft
 					// Object GCed, but we can recover
 				}
 				try {
-					if (VirtualMachine.EventPolicies[es[0].EventType] != SuspendPolicy.None)
+					if (es.SuspendPolicy != SuspendPolicy.None)
 						vm.Resume();
 				} catch (InvalidOperationException) {
 					// We want the VM resumed;
