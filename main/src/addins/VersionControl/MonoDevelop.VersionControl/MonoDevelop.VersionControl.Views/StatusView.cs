@@ -88,7 +88,12 @@ namespace MonoDevelop.VersionControl.Views
 			VersionControlItem item = items [0];
 			if (item.VersionInfo.IsVersioned) {
 				if (test) return true;
-				StatusView d = new StatusView (item.Path, item.Repository);
+				string path = item.Path;
+				if (Services.ProjectService.IsSolutionItemFile (item.Path.FullPath))
+					path = IdeApp.Workspace.FindSolutionItem (item.Path.FullPath).BaseDirectory;
+				else if (Services.ProjectService.IsWorkspaceItemFile (item.Path.FullPath))
+					path = IdeApp.Workspace.GetAllItems <WorkspaceItem> ().First (x => x.FileName.FullPath == item.Path.FullPath).BaseDirectory;
+				StatusView d = new StatusView (path, item.Repository);
 				IdeApp.Workbench.OpenDocument (d, true);
 				return true;
 			}

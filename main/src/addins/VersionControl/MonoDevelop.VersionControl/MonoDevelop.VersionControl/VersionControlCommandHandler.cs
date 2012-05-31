@@ -93,7 +93,7 @@ namespace MonoDevelop.VersionControl
 				// that has source files linked from outside the project's
 				// base directory
 				pentry = (IWorkspaceObject)obj;
-				var itemFiles = ((IWorkspaceFileObject)pentry).GetItemFiles (true);
+				var itemFiles = ((IWorkspaceFileObject)pentry).GetItemFiles (false);
 				path = MonoDevelop.Core.FilePath.GetCommonRootPath (itemFiles);
 				isDir = (System.IO.Directory.Exists(path));
 			} else if (obj is ProjectFolder) {
