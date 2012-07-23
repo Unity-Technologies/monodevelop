@@ -646,14 +646,14 @@ namespace Mono.TextEditor
 
 			switch (Caret.Mode) {
 			case CaretMode.Insert:
-				win.DrawLine (caretGc, (int)caretX, (int)caretY, (int)caretX, (int)(caretY + LineHeight - 1));
+				win.DrawRectangle (caretGc, true, new Gdk.Rectangle ((int)caretX, (int)caretY, 1, (int)LineHeight));
 				break;
 			case CaretMode.Block:
 				win.DrawRectangle (caretGc, true, new Gdk.Rectangle ((int)caretX, (int)caretY, (int)this.charWidth, (int)LineHeight));
 				break;
 			case CaretMode.Underscore:
 				double bottom = caretY + LineHeight;
-				win.DrawLine (caretGc, (int)caretX, (int)bottom, (int)(caretX + this.charWidth), (int)bottom);
+				win.DrawRectangle (caretGc, true, new Gdk.Rectangle ((int)caretX, (int)bottom-1, (int)this.charWidth, 1));
 				break;
 			}
 		}
