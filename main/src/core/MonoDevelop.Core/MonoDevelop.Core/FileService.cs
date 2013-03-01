@@ -271,13 +271,17 @@ namespace MonoDevelop.Core
 			
 			absPath           = Path.GetFullPath (absPath);
 			baseDirectoryPath = Path.GetFullPath (baseDirectoryPath.TrimEnd (Path.DirectorySeparatorChar));
-			
+
 			string[] bPath = baseDirectoryPath.Split (separators);
 			string[] aPath = absPath.Split (separators);
 			int indx = 0;
+
+			StringComparison comparison = (Platform.IsMac || Platform.IsWindows) ?
+			                              StringComparison.OrdinalIgnoreCase :
+			                              StringComparison.Ordinal;
 			
 			for (; indx < Math.Min (bPath.Length, aPath.Length); indx++) {
-				if (!bPath[indx].Equals(aPath[indx]))
+				if (!bPath[indx].Equals(aPath[indx], comparison))
 					break;
 			}
 			

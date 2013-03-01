@@ -172,9 +172,10 @@ namespace MonoDevelop.Ide.FindInFiles
 		public override IEnumerable<FileProvider> GetFiles (IProgressMonitor monitor, FilterOptions filterOptions)
 		{
 			foreach (Document document in IdeApp.Workbench.Documents) {
-				monitor.Log.WriteLine (GettextCatalog.GetString ("Looking in '{0}'", document.FileName));
-				if (!string.IsNullOrEmpty (document.FileName))
+				if (!string.IsNullOrEmpty (document.FileName)) {
+					monitor.Log.WriteLine (GettextCatalog.GetString ("Looking in '{0}'", document.FileName));
 					yield return new FileProvider (document.FileName);
+				}
 			}
 		}
 		

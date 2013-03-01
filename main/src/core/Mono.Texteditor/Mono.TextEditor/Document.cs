@@ -980,10 +980,12 @@ namespace Mono.TextEditor
 		
 		void RemoveFolding (FoldSegment folding)
 		{
-			folding.isAttached = false;
-			if (folding.isFolded)
-				foldedSegments.Remove (folding);
-			foldSegmentTree.Remove (folding);
+			Gtk.Application.Invoke (delegate {
+				folding.isAttached = false;
+				if (folding.isFolded)
+					foldedSegments.Remove (folding);
+				foldSegmentTree.Remove (folding);
+			});
 		}
 		
 		/// <summary>
