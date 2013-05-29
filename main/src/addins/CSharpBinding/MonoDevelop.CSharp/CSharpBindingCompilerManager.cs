@@ -27,6 +27,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 using System.Text;
@@ -131,7 +132,8 @@ namespace MonoDevelop.CSharp
 			string sysCore = project.AssemblyContext.GetAssemblyFullName ("System.Core", project.TargetFramework);
 			if (sysCore != null) {
 				sysCore = project.AssemblyContext.GetAssemblyLocation (sysCore, project.TargetFramework);
-				if (sysCore != null && !alreadyAddedReference.Contains (sysCore))
+				if (sysCore != null && 
+					!alreadyAddedReference.Any (r => (r == sysCore || r.EndsWith ("System.Core.dll", StringComparison.OrdinalIgnoreCase))))
 					AppendQuoted (sb, "/r:", sysCore);
 			}
 			

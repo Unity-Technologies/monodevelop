@@ -7,7 +7,7 @@ use File::Copy;
 use File::Path;
 
 my $GTK_VERSION = "2.12";
-my $GTK_INSTALLER = "gtk-sharp-2.12.9-2.win32.msi";
+my $GTK_INSTALLER = "gtk-sharp-2.12.20.msi";
 my $MONO_LIBRARIES_VERSION = "2.6";
 my $MONO_LIBRARIES_INSTALLER = "MonoLibraries.msi";
 my $SevenZip = '"C:\Program Files (x86)\7-Zip\7z"';
@@ -45,7 +45,7 @@ else
 	print "== Mono Libraries $MONO_LIBRARIES_VERSION already installed\n";
 }
 
-if (!-d $gtkPath)
+if (!-e "$gtkPath/bin/libjpeg-8.dll")
 {
 	print "== Installing GTK Sharp $GTK_VERSION. The machine must be restarted for it to work properly.\n";
 	system("msiexec /i $root\\monodevelop\\dependencies\\$GTK_INSTALLER /passive /promptrestart") && die("Failed to install GTK");
@@ -103,18 +103,18 @@ copy "$root/monodevelop-hg/monodevelop-hg/bin/Release/Mercurial.dll", "$mdRoot/A
 mkpath "$mdRoot/lib";
 mkpath "$mdRoot/etc";
 mkpath "$mdRoot/share";
-system("xcopy /s \"$gtkPath/bin\" \"$mdRoot/bin\"");
-system("xcopy /s \"$gtkPath/lib\" \"$mdRoot/lib\"");
-system("xcopy /s \"$gtkPath/etc\" \"$mdRoot/etc\"");
-system("xcopy /s \"$gtkPath/share\" \"$mdRoot/share\"");
-system("xcopy /s \"$gtkPath/lib/Mono.Posix\" \"$mdRoot/bin\"");
-system("xcopy /s \"$gtkPath/lib/gtk-sharp-2.0\" \"$mdRoot/bin\"");
-system("xcopy /s \"$gtkPath/lib/Mono.Cairo\" \"$mdRoot/bin\"");
+system("xcopy /s /y \"$gtkPath/bin\" \"$mdRoot/bin\"");
+system("xcopy /s /y \"$gtkPath/lib\" \"$mdRoot/lib\"");
+system("xcopy /s /y \"$gtkPath/etc\" \"$mdRoot/etc\"");
+system("xcopy /s /y \"$gtkPath/share\" \"$mdRoot/share\"");
+system("xcopy /s /y \"$gtkPath/lib/Mono.Posix\" \"$mdRoot/bin\"");
+system("xcopy /s /y \"$gtkPath/lib/gtk-sharp-2.0\" \"$mdRoot/bin\"");
+system("xcopy /s /y \"$gtkPath/lib/Mono.Cairo\" \"$mdRoot/bin\"");
 # TODO: An installer should execute "gdk-pixbuf-query-loaders.exe > ../etc/gtk-2.0/gdk-pixbuf.loaders" after installing files to get a proper loader file
 copy "$root/monodevelop/dependencies/gdk-pixbuf.loaders", "$mdRoot/etc/gtk-2.0";
 
 # Mono Libraries dependency files
-system("xcopy /s \"$monolibPath\" \"$mdRoot/bin\"");
+system("xcopy /s /y \"$monolibPath\" \"$mdRoot/bin\"");
 
 chdir "$root/boo";
 system("$nant -t:net-4.0 rebuild") && die ("Failed to build Boo");
