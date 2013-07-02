@@ -8,6 +8,8 @@ use File::Path;
 
 my $GTK_VERSION = "2.12";
 my $GTK_INSTALLER = "gtk-sharp-2.12.20.msi";
+my $MONO_LIBRARIES_VERSION = "2.6";
+my $MONO_LIBRARIES_INSTALLER = "MonoLibraries.msi";
 my $SevenZip = '"C:\Program Files (x86)\7-Zip\7z"';
 
 my $root = "";
@@ -26,9 +28,21 @@ my $nant = "\"$root/monodevelop/dependencies/nant-0.91-nightly-2011-05-08/bin/NA
 # my $nant = "\"C:/nant-0.91-nightly-2011-05-08/bin/NAnt.exe\"";
 
 my $gtkPath = "$ENV{ProgramFiles}/GtkSharp/$GTK_VERSION";
+my $monolibPath = "$ENV{ProgramFiles}/MonoLibraries/$MONO_LIBRARIES_VERSION";
 if (defined($ENV{'ProgramFiles(x86)'}))
 {
 	$gtkPath = "$ENV{'ProgramFiles(x86)'}/GtkSharp/$GTK_VERSION";
+	$monolibPath = "$ENV{'ProgramFiles(x86)'}/MonoLibraries/$MONO_LIBRARIES_VERSION";
+}
+
+if (!-d $monolibPath)
+{
+	print "== Installing Mono Libraries $MONO_LIBRARIES_VERSION\n";
+	system("msiexec /i $root\\monodevelop\\dependencies\\$MONO_LIBRARIES_INSTALLER /passive") && die("Failed to install mono libraries");
+}
+else
+{
+	print "== Mono Libraries $MONO_LIBRARIES_VERSION already installed\n";
 }
 
 if (!-e "$gtkPath/bin/libjpeg-8.dll")
@@ -97,8 +111,17 @@ system("xcopy /s /y \"$gtkPath/lib/Mono.Posix\" \"$mdRoot/bin\"");
 system("xcopy /s /y \"$gtkPath/lib/gtk-sharp-2.0\" \"$mdRoot/bin\"");
 system("xcopy /s /y \"$gtkPath/lib/Mono.Cairo\" \"$mdRoot/bin\"");
 # TODO: An installer should execute "gdk-pixbuf-query-loaders.exe > ../etc/gtk-2.0/gdk-pixbuf.loaders" after installing files to get a proper loader file
-copy ("$root/monodevelop/dependencies/gdk-pixbuf.loaders", "$mdRoot/etc/gtk-2.0");
-copy ("$root/monodevelop/dependencies/monodoc.dll", "$mdRoot/bin");
+copy "$root/monodevelop/dependencies/gdk-pixbuf.loaders", "$mdRoot/etc/gtk-2.0";
+copy "$root/monodevelop/dependencies/monodoc.dll", "$mdRoot/bin";
+
+# Mono Libraries dependency files
+# system("xcopy /s /y \"$monolibPath\" \"$mdRoot/bin\"");
+
+my $monoLib;
+foreach $monoLib (('ICSharpCode.SharpZipLib.dll', 'Mono.GetOptions.dll', 'Mono.Security.dll'))
+{
+	copy "$monolibPath/$monoLib", "$mdRoot/bin";
+}
 
 chdir "$root/boo";
 system("$nant -t:net-4.0 rebuild") && die ("Failed to build Boo");
