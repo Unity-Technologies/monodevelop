@@ -1367,10 +1367,10 @@ namespace MonoDevelop.AssemblyBrowser
 			result = new AssemblyLoader (this, fileName);
 			
 			definitions.Add (result);
-			result.LoadingTask.ContinueWith (delegate {
-				Application.Invoke (delegate {
+			// result.LoadingTask.ContinueWith (delegate {
+			// 	Application.Invoke (delegate {
 					if (definitions == null)
-						return;
+						return result;
 					ITreeBuilder builder;
 					if (definitions.Count + projects.Count == 1) {
 						builder = TreeView.LoadTree (result);
@@ -1378,9 +1378,9 @@ namespace MonoDevelop.AssemblyBrowser
 						builder = TreeView.AddChild (result);
 					}
 					builder.Selected = builder.Expanded = selectReference;
-				});
-			}
-			);
+			// 	});
+			// }
+			// );
 			return result;
 		}
 		

@@ -72,7 +72,19 @@ namespace MonoDevelop.Ide.Desktop
 		
 		public virtual void ShowUrl (string url)
 		{
-			Process.Start (url);
+            for (int i = 0; i < 3; ++i)
+            {
+                // Randomly fails sometimes; retry twice
+                try
+                {
+                    Process.Start(url);
+                    return;
+                }
+                catch
+                {
+                }
+            }
+            LoggingService.LogWarning("Unable to open {0}", url);
 		}
 
 		public string GetMimeTypeForUri (string uri)

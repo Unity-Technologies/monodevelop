@@ -779,7 +779,9 @@ namespace MonoDevelop.SourceEditor
 		public void Load (string fileName, Encoding loadEncoding)
 		{
 			// Handle the "reload" case.
-			if (ContentName == fileName)
+			bool reload = ContentName == fileName;
+
+			if (reload)
 				AutoSave.RemoveAutoSaveFile (fileName);
 
 			if (warnOverwrite) {
@@ -816,14 +818,16 @@ namespace MonoDevelop.SourceEditor
 			lastSaveTimeUtc = File.GetLastWriteTimeUtc (ContentName);			
 			RunFirstTimeFoldUpdate (text);
 
-			widget.TextEditor.Caret.Offset = 0;
+			if (!reload)
+				widget.TextEditor.Caret.Offset = 0;
 			UpdateExecutionLocation ();
 			UpdateBreakpoints ();
 			UpdatePinnedWatches ();
 			LoadExtensions ();
 			this.IsDirty = !didLoadCleanly;
 			UpdateTasks (null, null);
-			widget.TextEditor.VAdjustment.Changed += HandleTextEditorVAdjustmentChanged;
+			if (!reload)
+				widget.TextEditor.VAdjustment.Changed += HandleTextEditorVAdjustmentChanged;
 			if (didLoadCleanly)
 				Document.InformLoadComplete ();
 		}

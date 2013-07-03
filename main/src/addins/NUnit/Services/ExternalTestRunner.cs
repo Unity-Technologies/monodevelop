@@ -104,7 +104,8 @@ namespace MonoDevelop.NUnit.External
 		}
 	}
 	
-	class EventListenerWrapper: MarshalByRefObject, EventListener
+    [Serializable]
+	class EventListenerWrapper: EventListener
 	{
 		IRemoteEventListener wrapped;
 		StringBuilder consoleOutput;
@@ -160,12 +161,7 @@ namespace MonoDevelop.NUnit.External
 			consoleOutput = new StringBuilder ();
 			consoleError = new StringBuilder ();
 		}
-		
-		public override object InitializeLifetimeService ()
-		{
-			return null;
-		}
-		
+
 		string GetTestName (ITest t)
 		{
 			if (t == null)
