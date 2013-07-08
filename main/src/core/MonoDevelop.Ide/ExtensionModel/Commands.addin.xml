@@ -732,12 +732,12 @@
 			_label = "Find _Next" 
 			icon = "md-find-next-icon" 
 			_description = "Search forwards for the same text" 
-			shortcut = "Control|G"
+			shortcut = "F3"
 			macShortcut = "Meta|G" />
 	<Command id = "MonoDevelop.Ide.Commands.SearchCommands.FindPrevious"
 			_label = "Find _Previous" 
 			_description = "Search backwards for the same text" 
-			shortcut = "Control|Shift|G"
+			shortcut = "Shift|F3"
 			macShortcut = "Meta|Shift|G" />
 
 	<Command id = "MonoDevelop.Ide.Commands.SearchCommands.EmacsFindNext"
@@ -813,7 +813,7 @@
 	<Command id = "MonoDevelop.Ide.Commands.SearchCommands.GotoLineNumber"
 			_label = "_Go to Line..." 
 			_description = "Go to a specific line"
-			shortcut = "Control|I"
+			shortcut = "Control|G"
 			macShortcut = "Meta|L"
 			icon = "gtk-jump-to" />
 	<Command id = "MonoDevelop.Ide.Commands.SearchCommands.UseSelectionForFind"

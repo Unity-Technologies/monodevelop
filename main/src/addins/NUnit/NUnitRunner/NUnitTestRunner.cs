@@ -28,7 +28,6 @@
 
 
 using System;
-using System.Linq;
 using System.Reflection;
 using System.IO;
 using System.Collections;
@@ -187,8 +186,13 @@ namespace MonoDevelop.NUnit.External
 		
 		public bool Pass (ITest test)
 		{
-			if (!test.IsSuite && names.Any (n => test.TestName.FullName == n))
-				return true;
+			if (!test.IsSuite) {
+				foreach (var name in names) {
+					if (name == test.TestName.FullName)
+						return true;
+				}
+			}
+
 			if (test.Tests != null) {
 				foreach (ITest ct in test.Tests) {
 					if (Pass (ct))

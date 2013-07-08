@@ -172,13 +172,13 @@ namespace MonoDevelop.Ide
 					useExternalMonodoc = true;
 				pw = null;
 			} catch (Exception e) {
-				MessageService.ShowError (String.Format (
-					"Could not start monodoc : {0}", e.ToString ()));
+                //LoggingService.LogError (String.Format (
+                //    "Could not start monodoc : {0}", e.ToString ()));
 			}
 
-			if (!useExternalMonodoc)
-				MessageService.ShowError (
-					BrandingService.BrandApplicationName (GettextCatalog.GetString ("You need a newer monodoc to use it externally from MonoDevelop. Using the integrated help viewer now.")));
+            //if (!useExternalMonodoc)
+            //    MessageService.ShowError (
+            //        BrandingService.BrandApplicationName (GettextCatalog.GetString ("You need a newer monodoc to use it externally from MonoDevelop. Using the integrated help viewer now.")));
 		}
 		
 		string DirArgs {
