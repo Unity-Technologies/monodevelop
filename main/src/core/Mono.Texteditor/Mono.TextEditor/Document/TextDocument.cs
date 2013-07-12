@@ -153,8 +153,8 @@ namespace Mono.TextEditor
 		{
 			return new TextDocument (new StringBuffer (text), new PrimitiveLineSplitter ()) {
 				SuppressHighlightUpdate = suppressHighlighting,
+				ReadOnly = true,
 				Text = text,
-				ReadOnly = true
 			};
 		}
 
@@ -181,19 +181,31 @@ namespace Mono.TextEditor
 				return buffer.Text;
 			}
 			set {
-				var args = new DocumentChangeEventArgs (0, Text, value);
-				textSegmentMarkerTree.Clear ();
-				OnTextReplacing (args);
-				buffer.Text = value;
-				extendingTextMarkers = new List<TextLineMarker> ();
-				splitter.Initalize (value);
-				ClearFoldSegments ();
-				OnTextReplaced (args);
-				versionProvider = new TextSourceVersionProvider ();
-				OnTextSet (EventArgs.Empty);
-				CommitUpdateAll ();
-				ClearUndoBuffer ();
+				// Can't replace in immutable documents, flush instead
+				if (ReadOnly)
+					FlushDocument (value);
+				// Let folding/undo be managed by Replace
+				else if (value != buffer.Text)
+					Replace (0, buffer.TextLength, value);
 			}
+		}
+
+		// Completely clear and replace document,
+		// including folding, vcs, and undo buffers
+		void FlushDocument (string text)
+		{
+			var args = new DocumentChangeEventArgs (0, Text, text);
+			textSegmentMarkerTree.Clear ();
+			OnTextReplacing (args);
+			buffer.Text = text;
+			extendingTextMarkers = new List<TextLineMarker> ();
+			splitter.Initalize (text);
+			ClearFoldSegments ();
+			OnTextReplaced (args);
+			versionProvider = new TextSourceVersionProvider ();
+			OnTextSet (EventArgs.Empty);
+			CommitUpdateAll ();
+			ClearUndoBuffer ();
 		}
 
 		public void Insert (int offset, string text, ICSharpCode.NRefactory.Editor.AnchorMovementType anchorMovementType = AnchorMovementType.Default)

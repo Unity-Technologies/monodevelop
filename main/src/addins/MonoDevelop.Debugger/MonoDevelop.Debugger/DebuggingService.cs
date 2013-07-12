@@ -350,12 +350,7 @@ namespace MonoDevelop.Debugger
 			if (oldLayout != null) {
 				string layout = oldLayout;
 				oldLayout = null;
-				// Dispatch asynchronously to avoid start/stop races
-				DispatchService.GuiSyncDispatch (delegate {
-					IdeApp.Workbench.HideCommandBar ("Debug");
-					if (IdeApp.Workbench.CurrentLayout == "Debug")
-						IdeApp.Workbench.CurrentLayout = layout;
-				});
+				HideDebugCommandBar (layout);
 			}
 			
 			currentBacktrace = null;
@@ -461,6 +456,7 @@ namespace MonoDevelop.Debugger
 			session.TargetExited += delegate {
 				monitor.Dispose ();
 			};
+			ShowDebugCommandBar ();
 			session.AttachToProcess (proc, GetUserOptions ());
 			return monitor.AsyncOperation;
 		}
@@ -533,14 +529,8 @@ namespace MonoDevelop.Debugger
 				console = c;
 			
 			SetupSession ();
-			
-			// Dispatch synchronously to avoid start/stop races
-			DispatchService.GuiSyncDispatch (delegate {
-				oldLayout = IdeApp.Workbench.CurrentLayout;
-				IdeApp.Workbench.CurrentLayout = "Debug";
-				IdeApp.Workbench.ShowCommandBar ("Debug");
-			});
-			
+			ShowDebugCommandBar ();
+
 			try {
 				session.Run (startInfo, GetUserOptions ());
 			} catch {
@@ -548,6 +538,26 @@ namespace MonoDevelop.Debugger
 				throw;
 			}
 
+		}
+
+		static void ShowDebugCommandBar ()
+		{
+			// Dispatch synchronously to avoid start/stop races
+			DispatchService.GuiSyncDispatch (delegate {
+				oldLayout = IdeApp.Workbench.CurrentLayout;
+				IdeApp.Workbench.CurrentLayout = "Debug";
+				IdeApp.Workbench.ShowCommandBar ("Debug");
+			});
+		}
+
+		static void HideDebugCommandBar (string layout)
+		{
+			// Dispatch asynchronously to avoid start/stop races
+			DispatchService.GuiSyncDispatch (delegate {
+				IdeApp.Workbench.HideCommandBar ("Debug");
+				if (IdeApp.Workbench.CurrentLayout == "Debug")
+					IdeApp.Workbench.CurrentLayout = layout;
+			});
 		}
 		
 		static bool ExceptionHandler (Exception ex)

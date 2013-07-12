@@ -658,7 +658,7 @@ namespace MonoDevelop.Components.MainToolbar
 			}
 			else {
 				operation = RoundButton.OperationIcon.Run;
-				var ci = IdeApp.CommandService.GetCommandInfo ("MonoDevelop.Debugger.DebugCommands.Debug");
+				var ci = IdeApp.CommandService.GetCommandInfo ("MonoDevelop.Debugger.DebugCommands.AttachToProcess");
 				if (!ci.Enabled || !ci.Visible) {
 					// If debug is not enabled, try Run
 					ci = IdeApp.CommandService.GetCommandInfo (MonoDevelop.Ide.Commands.ProjectCommands.Run);
