@@ -151,6 +151,8 @@ namespace MonoDevelop.Ide.Gui
 				return fullscreen;
 			}
 			set {
+				if (Platform.IsMac)
+					return;
 				fullscreen = value;
 				if (fullscreen) {
 					this.Fullscreen ();

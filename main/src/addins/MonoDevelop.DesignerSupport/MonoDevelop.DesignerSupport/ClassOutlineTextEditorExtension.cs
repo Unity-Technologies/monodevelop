@@ -292,24 +292,26 @@ namespace MonoDevelop.DesignerSupport
 		{
 			DispatchService.AssertGuiThread ();
 			Gdk.Threads.Enter ();
-			refreshingOutline = false;
-			if (outlineTreeStore == null || !outlineTreeView.IsRealized) {
-				refillOutlineStoreId = 0;
-				return false;
+			try {
+				refreshingOutline = false;
+				if (outlineTreeStore == null || !outlineTreeView.IsRealized) {
+					refillOutlineStoreId = 0;
+					return false;
+				}
+				
+				outlineReady = false;
+				outlineTreeStore.Clear ();
+				if (lastCU != null) {
+					BuildTreeChildren (outlineTreeStore, TreeIter.Zero, lastCU);
+					TreeIter it;
+					if (outlineTreeStore.GetIterFirst (out it))
+						outlineTreeView.Selection.SelectIter (it);
+					outlineTreeView.ExpandAll ();
+				}
+				outlineReady = true;
+			} finally {
+				Gdk.Threads.Leave ();
 			}
-			
-			outlineReady = false;
-			outlineTreeStore.Clear ();
-			if (lastCU != null) {
-				BuildTreeChildren (outlineTreeStore, TreeIter.Zero, lastCU);
-				TreeIter it;
-				if (outlineTreeStore.GetIterFirst (out it))
-					outlineTreeView.Selection.SelectIter (it);
-				outlineTreeView.ExpandAll ();
-			}
-			outlineReady = true;
-
-			Gdk.Threads.Leave ();
 
 			//stop timeout handler
 			refillOutlineStoreId = 0;

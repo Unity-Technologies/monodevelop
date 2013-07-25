@@ -731,7 +731,7 @@ namespace MonoDevelop.SourceEditor
 
 		void RunFirstTimeFoldUpdate (string text)
 		{
-			if (string.IsNullOrEmpty (text)) 
+			if (string.IsNullOrEmpty (text) || string.IsNullOrEmpty (Document.FileName)) 
 				return;
 			ParsedDocument parsedDocument = null;
 

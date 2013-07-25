@@ -106,10 +106,14 @@ namespace MonoDevelop.NUnit.External
 		
 		public NunitTestInfo GetTestInfo (string path, List<string> supportAssemblies)
 		{
-			InitSupportAssemblies (supportAssemblies);
-			
-			TestSuite rootTS = new TestSuiteBuilder ().Build (new TestPackage (path));
-			return BuildTestInfo (rootTS);
+			try {
+				InitSupportAssemblies (supportAssemblies);
+				
+				TestSuite rootTS = new TestSuiteBuilder ().Build (new TestPackage (path));
+				return BuildTestInfo (rootTS);
+			} catch {
+			}
+			return null;
 		}
 		
 		NunitTestInfo BuildTestInfo (Test test)
