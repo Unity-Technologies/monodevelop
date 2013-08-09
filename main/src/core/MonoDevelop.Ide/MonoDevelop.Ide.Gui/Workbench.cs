@@ -77,7 +77,19 @@ namespace MonoDevelop.Ide.Gui
 				monitor.Step (1);
 				
 				Counters.Initialization.Trace ("Initializing Workspace");
-				workbench.InitializeWorkspace();
+				try
+				{
+					workbench.InitializeWorkspace();
+				}
+				catch (EntryPointNotFoundException epnfe)
+				{
+					if (Platform.IsWindows)
+					{
+						MessageService.ShowException(epnfe, "An error occurred while initializing MonoDevelop.\nThe most likely cause for this is a conflicting installation of Gtk#.\nPlease uninstall any existing Gtk# installations and, if necessary, install Gtk# 2.12.20 or later.\n(E.g. http://download.xamarin.com/Installer/gtk-sharp-2.12.20.msi )");
+						Environment.Exit(1);
+					}
+					throw;
+				}
 				monitor.Step (1);
 				
 				Counters.Initialization.Trace ("Initializing Layout");

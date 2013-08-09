@@ -182,7 +182,7 @@ namespace Mono.TextEditor
 			}
 			set {
 				// Can't replace in immutable documents, flush instead
-				if (ReadOnly)
+				if (ReadOnly || string.IsNullOrEmpty (buffer.Text))
 					FlushDocument (value);
 				// Let folding/undo be managed by Replace
 				else if (value != buffer.Text)
