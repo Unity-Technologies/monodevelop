@@ -130,6 +130,7 @@ namespace Mono.TextEditor
 			this.splitter = splitter;
 			splitter.LineChanged += SplitterLineSegmentTreeLineChanged;
 			splitter.LineRemoved += HandleSplitterLineSegmentTreeLineRemoved;
+			splitter.Initalize (buffer.Text);
 			foldSegmentTree.tree.NodeRemoved += HandleFoldSegmentTreetreeNodeRemoved; 
 			textSegmentMarkerTree.InstallListener (this);
 		}

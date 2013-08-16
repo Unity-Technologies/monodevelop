@@ -115,7 +115,7 @@ namespace MonoDevelop.Ide.Templates
 				}
 			}
 
-			int offset = Math.Min (0, doc.GetOffset (new ICSharpCode.NRefactory.TextLocation (realStartLine, 0)));
+			int offset = Math.Max (0, doc.GetOffset (new ICSharpCode.NRefactory.TextLocation (realStartLine, 0)));
 			return doc.GetTextAt (offset, doc.TextLength - offset);
 		}
 
