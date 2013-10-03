@@ -1221,7 +1221,8 @@ namespace Mono.Debugging.Soft
 				else
 					etype = TargetEventType.ExceptionThrown;
 				exception = ev.Exception;
-				if (ev.Request != unhandledExceptionRequest || exception.Type.FullName != "System.Threading.ThreadAbortException")
+
+				if (IsRunning && (ev.Request != unhandledExceptionRequest || exception.Type.FullName != "System.Threading.ThreadAbortException"))
 					resume = false;
 			}
 			else {

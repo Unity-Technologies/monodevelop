@@ -70,8 +70,8 @@ namespace MonoDevelop.Ide.Navigation
 				doc = null;
 			}
 		}
-		
-		FilePath FileName {
+
+		internal FilePath FileName {
 			get { return doc != null? doc.FileName : fileName; }
 		}
 		

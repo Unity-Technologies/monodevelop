@@ -178,7 +178,8 @@
 		<Word>using</Word>
 	</Keywords>
 	
-	<Keywords color = "keyword.property">		<Word>get</Word>
+	<Keywords color = "keyword.property">
+		<Word>get</Word>
 		<Word>set</Word>
 		<Word>add</Word>
 		<Word>remove</Word>
@@ -746,6 +747,11 @@
 		<Word>SerializedObject</Word>
 		<Word>SerializedProperty</Word>
 		<Word>SerializedPropertyType</Word>
+		<Word>Sprite</Word>
+		<Word>SpriteRenderer</Word>
+		<Word>SpriteAlignment</Word>
+		<Word>SpritePackingMode</Word>
+		<Word>SpritePackingRotation</Word>
 		<Word>StaticOcclusionCulling</Word>
 		<Word>StaticOcclusionCullingMode</Word>
 		<Word>StaticOcclusionCullingVisualization</Word>

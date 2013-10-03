@@ -65,6 +65,7 @@ namespace MonoDevelop.Ide.Navigation
 			TextEditorService.LineCountChangesCommitted += CommitCountChanges;
 			TextEditorService.LineCountChangesReset += ResetCountChanges;
 			IdeApp.Workspace.FileRenamedInProject += FileRenamed;
+			IdeApp.Workspace.FileRemovedFromProject += FileRemoved;
 			
 			IdeApp.Workbench.ActiveDocumentChanged += ActiveDocChanged;
 		}
@@ -313,13 +314,48 @@ namespace MonoDevelop.Ide.Navigation
 			foreach (ProjectFileRenamedEventInfo args in e) {
 				foreach (NavigationHistoryItem point in history) {
 					DocumentNavigationPoint dp = point.NavigationPoint as DocumentNavigationPoint;
-					changed &= (dp != null && dp.HandleRenameEvent (args.OldName, args.NewName));
+					if (dp != null && dp.HandleRenameEvent(args.OldName, args.NewName))
+						changed = true;
 				}
 			}
 			if (changed)
 				OnHistoryChanged ();
 		}
-		
+
+		static void FileRemoved (object sender, ProjectFileEventArgs e)
+		{
+			bool changed = false;
+			foreach (ProjectFileEventInfo args in e) {
+				foreach (NavigationHistoryItem point in history) {
+					var dp = point.NavigationPoint as DocumentNavigationPoint;
+					if (RemoveNavigationPoint(dp, args))
+						changed = true;
+				}
+			}
+			if (changed)
+				OnHistoryChanged ();
+		}
+
+		private static bool RemoveNavigationPoint(DocumentNavigationPoint dp, ProjectFileEventInfo args)
+		{
+			if (dp == null) {
+				return false;
+			}
+
+			if (dp.FileName == args.ProjectFile.FilePath) {
+
+				if (IsCurrent(dp.ParentItem)) {
+					history.RemoveCurrent();
+				} else {
+					dp.Dispose();
+				}
+
+				return true;	
+			}
+			
+			return false;
+		}
+
 		#endregion
 	}
 }
