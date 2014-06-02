@@ -145,9 +145,19 @@ namespace MonoDevelop.Ide.CodeCompletion
 		{
 			if (!IsVisible) 
 				return;
-			if (wnd.CompletionWidget.CaretOffset < wnd.StartOffset)
-				DestroyWindow ();
+			
+			if (IsCaretOutsideCurrentWord())
+				DestroyWindow();
+		}
 
+		private static bool IsCaretOutsideCurrentWord()
+		{
+			var currentCompletionContext = wnd.CompletionWidget.CurrentCodeCompletionContext;
+			var completionContext = wnd.CodeCompletionContext;
+
+			return wnd.CompletionWidget.CaretOffset < wnd.StartOffset
+			       || currentCompletionContext.TriggerLine != completionContext.TriggerLine
+			       || currentCompletionContext.TriggerOffset > completionContext.TriggerOffset + (wnd.List.CompletionString ?? "").Length + 1;
 		}
 
 		public static void UpdateWordSelection (string text)

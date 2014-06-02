@@ -371,7 +371,9 @@ namespace MonoDevelop.Ide
 		/// <summary>Centers a window relative to its parent.</summary>
 		static void CenterWindow (Window child, Window parent)
 		{
-			child.Child.Show ();
+			if (child == null)
+				return;
+			child.ShowAll ();
 			int w, h, winw, winh, x, y, winx, winy;
 			child.GetSize (out w, out h);
 			parent.GetSize (out winw, out winh);

@@ -55,19 +55,24 @@ namespace MonoDevelop.MacIntegration
 	{
 		const string monoDownloadUrl = "http://www.go-mono.com/mono-downloads/download.html";
 
-		static TimerCounter timer = InstrumentationService.CreateTimerCounter ("Mac Platform Initialization", "Platform Service");
-		static TimerCounter mimeTimer = InstrumentationService.CreateTimerCounter ("Mac Mime Database", "Platform Service");
+		TimerCounter timer = InstrumentationService.CreateTimerCounter ("Mac Platform Initialization", "Platform Service");
+		TimerCounter mimeTimer = InstrumentationService.CreateTimerCounter ("Mac Mime Database", "Platform Service");
+
+		static bool initedGlobal;
+		bool setupFail, initedApp;
 		
-		static bool setupFail, initedApp, initedGlobal;
-		
-		static Lazy<Dictionary<string, string>> mimemap;
+		Lazy<Dictionary<string, string>> mimemap;
 		
 		//this is a BCD value of the form "xxyz", where x = major, y = minor, z = bugfix
 		//eg. 0x1071 = 10.7.1
-		static int systemVersion;
+		int systemVersion;
 
-		static MacPlatformService ()
+		public MacPlatformService ()
 		{
+			if (initedGlobal)
+				throw new Exception ("Only one MacPlatformService instance allowed");
+			initedGlobal = true;
+
 			timer.BeginTiming ();
 			
 			systemVersion = Carbon.Gestalt ("sysv");
@@ -149,7 +154,7 @@ namespace MonoDevelop.MacIntegration
 			get { return "OSX"; }
 		}
 		
-		static Dictionary<string, string> LoadMimeMapAsync ()
+		Dictionary<string, string> LoadMimeMapAsync ()
 		{
 			var map = new Dictionary<string, string> ();
 			// All recent Macs should have this file; if not we'll just die silently
@@ -202,7 +207,7 @@ namespace MonoDevelop.MacIntegration
 			return true;
 		}
 		
-		static void InitApp (CommandManager commandManager)
+		void InitApp (CommandManager commandManager)
 		{
 			if (initedApp)
 				return;
@@ -242,27 +247,17 @@ namespace MonoDevelop.MacIntegration
 			IdeApp.Workbench.RootWindow.DeleteEvent += HandleDeleteEvent;
 		}
 
-		static void GlobalSetup ()
+		void GlobalSetup ()
 		{
-			if (initedGlobal || setupFail)
-				return;
-			initedGlobal = true;
-			
 			//FIXME: should we remove these when finalizing?
 			try {
 				ApplicationEvents.Quit += delegate (object sender, ApplicationQuitEventArgs e)
 				{
-					// Easy case, we're pretty sure a modal dialog isn't running.
-					// All our custom Cocoa dialogs use subclasses, not vanilla NSWindow.
-					// GTK uses NSWindow but we can determine whether it's modal from GTK.
-					var keyWindow = NSApplication.SharedApplication.KeyWindow;
-					if (keyWindow != null && keyWindow.ClassHandle == MonoMac.ObjCRuntime.Class.GetHandle ("NSWindow")) {
-						var windows = Gtk.Window.ListToplevels ();
-						if (!windows.Any (w => w.Modal && w.Visible)) {
-							e.UserCancelled = !IdeApp.Exit ();
-							e.Handled = true;
-							return;
-						}
+					// We can only attempt to quit safely if all windows are GTK windows and not modal
+					if (!IsModalDialogRunning ()) {
+						e.UserCancelled = !IdeApp.Exit ();
+						e.Handled = true;
+						return;
 					}
 
 					// When a modal dialog is running, things are much harder. We can't just shut down MD behind the
@@ -617,6 +612,38 @@ end tell", directory.ToString ().Replace ("\"", "\\\"")));
 		protected override RecentFiles CreateRecentFilesProvider ()
 		{
 			return new FdoRecentFiles (UserProfile.Current.LocalConfigDir.Combine ("RecentlyUsed.xml"));
+		}
+
+		public override bool GetIsFullscreen (Gtk.Window window)
+		{
+			if (MacSystemInformation.OsVersion < MacSystemInformation.Lion) {
+				return base.GetIsFullscreen (window);
+			}
+
+			NSWindow nswin = GtkQuartz.GetWindow (window);
+			return (nswin.StyleMask & NSWindowStyle.FullScreenWindow) != 0;
+		}
+
+		public override void SetIsFullscreen (Gtk.Window window, bool isFullscreen)
+		{
+			if (MacSystemInformation.OsVersion < MacSystemInformation.Lion) {
+				base.SetIsFullscreen (window, isFullscreen);
+				return;
+			}
+
+			NSWindow nswin = GtkQuartz.GetWindow (window);
+			if (isFullscreen != ((nswin.StyleMask & NSWindowStyle.FullScreenWindow) != 0)) {
+				//HACK: workaround for MonoMac not allowing null as argument
+				MonoMac.ObjCRuntime.Messaging.void_objc_msgSend_IntPtr (
+					nswin.Handle,
+					MonoMac.ObjCRuntime.Selector.GetHandle ("toggleFullScreen:"),
+					IntPtr.Zero);
+			}
+		}
+
+		public override bool IsModalDialogRunning ()
+		{
+			return GtkQuartz.GetToplevels ().Any (t => t.Key.IsVisible && (t.Value == null || t.Value.Modal));
 		}
 	}
 }

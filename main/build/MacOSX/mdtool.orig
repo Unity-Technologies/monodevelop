@@ -14,7 +14,7 @@ export PATH="$MONO_FRAMEWORK_PATH/bin:$PATH"
 
 DIR=$(cd "$(dirname "$0")"; pwd)
 
-EXE_PATH="$DIR/lib/monodevelop/bin/mdrun.exe"
+EXE_PATH="$DIR/lib/monodevelop/bin/mdtool.exe"
 
 PKG_CONFIG_PATH="$DIR/lib/pkgconfig:$PKG_CONFIG_PATH"
 export PKG_CONFIG_PATH

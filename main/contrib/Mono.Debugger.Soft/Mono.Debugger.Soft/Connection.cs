@@ -1138,6 +1138,7 @@ namespace Mono.Debugger.Soft
 
 		internal void Close () {
 			closed = true;
+			TransportClose();
 		}
 
 		internal bool IsClosed {
