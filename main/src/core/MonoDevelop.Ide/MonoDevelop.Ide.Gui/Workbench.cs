@@ -928,7 +928,7 @@ namespace MonoDevelop.Ide.Gui
 				
 				foreach (DocumentUserPrefs doc in prefs.Files.Distinct (new DocumentUserPrefsFilenameComparer ())) {
 					string fileName = baseDir.Combine (doc.FileName).FullPath;
-					if (File.Exists (fileName)) {
+					if (GetDocument(fileName) == null && File.Exists (fileName)) {
 						var view = IdeApp.Workbench.BatchOpenDocument (pm, fileName, doc.Line, doc.Column);
 						if (fileName == currentFileName)
 							currentView = view;
