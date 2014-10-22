@@ -77,6 +77,8 @@ namespace MonoDevelop.Debugger
 		static bool isBusy;
 		static StatusBarIcon busyStatusIcon;
 
+		static bool IdeExiting = false;
+
 		static public event EventHandler DebugSessionStarted;
 		static public event EventHandler PausedEvent;
 		static public event EventHandler ResumedEvent;
@@ -110,6 +112,8 @@ namespace MonoDevelop.Debugger
 				// Regresh the engine list
 				evaluators = null;
 			});
+
+			IdeApp.Exiting += (object sender, ExitEventArgs args) => IdeExiting = true;
         }
 
 		public static IExecutionHandler GetExecutionHandler ()
@@ -552,6 +556,9 @@ namespace MonoDevelop.Debugger
 
 		static void HideDebugCommandBar (string layout)
 		{
+			if (IdeExiting)
+				return;
+
 			// Dispatch asynchronously to avoid start/stop races
 			DispatchService.GuiSyncDispatch (delegate {
 				IdeApp.Workbench.HideCommandBar ("Debug");
