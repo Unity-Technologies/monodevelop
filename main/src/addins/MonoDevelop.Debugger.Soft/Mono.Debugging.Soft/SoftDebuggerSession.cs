@@ -57,6 +57,7 @@ namespace Mono.Debugging.Soft
 		bool useFullPaths = true;
 		Dictionary<string,TypeMirror> types = new Dictionary<string, TypeMirror> ();
 		Dictionary<string, MonoSymbolFile> symbolFiles = new Dictionary<string, MonoSymbolFile> ();
+		Dictionary<string, string> symbolFileCopies = new Dictionary<string, string> ();
 		Dictionary<EventRequest,BreakInfo> breakpoints = new Dictionary<EventRequest,BreakInfo> ();
 		List<BreakInfo> pending_bes = new List<BreakInfo> ();
 		ThreadMirror current_thread, recent_thread;
@@ -558,6 +559,8 @@ namespace Mono.Debugging.Soft
 
 			symbolFiles.Clear ();
 			symbolFiles = null;
+
+			symbolFileCopies.Clear ();
 
 			if (!HasExited) {
 				if (vm != null) {
@@ -1871,11 +1874,42 @@ namespace Mono.Debugging.Soft
 			int fileId = -1;
 			
 			try {
+
+				string mdbCopyFileName;
+
+				// Make a copy of the .mdb file as Cecil keeps the file open and this causes
+				// issues on Windows if the file is updated while the soft debugger running.
+				if (!symbolFileCopies.TryGetValue(mdbFileName, out mdbCopyFileName))
+				{
+					LoggingService.LogMessage("SoftDebuggerSession: Copying " + mdbFileName + " to " + mdbCopyFileName);
+					mdbCopyFileName = Path.GetTempFileName();
+					File.Copy(mdbFileName, mdbCopyFileName, true);
+					symbolFileCopies.Add(mdbFileName, mdbCopyFileName);
+				}
+				else
+				{
+					// Check if .mdb file has been updated and if so, reload it.
+					if (File.GetLastWriteTimeUtc(mdbFileName) > File.GetLastWriteTimeUtc(mdbCopyFileName))
+					{
+						MonoSymbolFile oldMdb;
+
+						if (!symbolFiles.TryGetValue (mdbFileName, out oldMdb)) 
+						{
+							return false;
+						}
+							
+						oldMdb.Dispose(); // Close file handle on currently open .mdb file
+						symbolFiles.Remove(mdbFileName);
+						LoggingService.LogMessage("SoftDebuggerSession: Copying updated " + mdbFileName + " to " + mdbCopyFileName);
+						File.Copy(mdbFileName, mdbCopyFileName, true);
+					}
+				}
+
 				if (!symbolFiles.TryGetValue (mdbFileName, out mdb)) {
-					if (!File.Exists (mdbFileName))
+					if (!File.Exists (mdbCopyFileName))
 						return false;
 					
-					mdb = MonoSymbolFile.ReadSymbolFile (mdbFileName);
+					mdb = MonoSymbolFile.ReadSymbolFile (mdbCopyFileName);
 					symbolFiles.Add (mdbFileName, mdb);
 				}
 				
