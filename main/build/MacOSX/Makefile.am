@@ -174,7 +174,7 @@ mono-bundle: app
 	echo "Copying system framework ($(CURRENT))"
 	rm -rf $(MAC_APP_DIR)/Contents/Frameworks/Mono.framework $(DEPENDENCIES)/Mono.framework
 	mkdir -p $(MAC_APP_DIR)/Contents/Frameworks/Mono.framework/Versions
-	unzip -d $(DEPENDENCIES) $(DEPENDENCIES)/Mono.framework-2.10.11.zip
+	unzip -d $(DEPENDENCIES) $(DEPENDENCIES)/Mono.framework-2.10.12.zip
 	CURRENT=$(shell readlink $(DEPENDENCIES)/Mono.framework/Versions/Current)
 	cp -R $(DEPENDENCIES)/Mono.framework/Versions/$(CURRENT) $(MAC_APP_DIR)/Contents/Frameworks/Mono.framework/Versions
 	ln -s Versions/Current/bin $(MAC_APP_DIR)/Contents/Frameworks/Mono.framework/Commands
