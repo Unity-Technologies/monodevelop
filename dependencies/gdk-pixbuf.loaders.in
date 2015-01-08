@@ -2,46 +2,46 @@
 # Automatically generated file, do not edit
 # Created by gdk-pixbuf-query-loaders from gdk-pixbuf-2.24.0
 #
-# LoaderDir = /Library/Frameworks/Mono.framework/Versions/2.10.11/lib/gdk-pixbuf-2.0/2.10.0/loaders
+# LoaderDir = /Library/Frameworks/Mono.framework/Versions/2.10.12/lib/gdk-pixbuf-2.0/2.10.0/loaders
 #
-"/Library/Frameworks/Mono.framework/Versions/2.10.11/lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-ani.so"
+"/Library/Frameworks/Mono.framework/Versions/2.10.12/lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-ani.so"
 "ani" 4 "gdk-pixbuf" "The ANI image format" "LGPL"
 "application/x-navi-animation" ""
 "ani" ""
 "RIFF    ACON" "    xxxx    " 100
 
-"/Library/Frameworks/Mono.framework/Versions/2.10.11/lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-bmp.so"
+"/Library/Frameworks/Mono.framework/Versions/2.10.12/lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-bmp.so"
 "bmp" 5 "gdk-pixbuf" "The BMP image format" "LGPL"
 "image/bmp" "image/x-bmp" "image/x-MS-bmp" ""
 "bmp" ""
 "BM" "" 100
 
-"/Library/Frameworks/Mono.framework/Versions/2.10.11/lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-gif.so"
+"/Library/Frameworks/Mono.framework/Versions/2.10.12/lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-gif.so"
 "gif" 4 "gdk-pixbuf" "The GIF image format" "LGPL"
 "image/gif" ""
 "gif" ""
 "GIF8" "" 100
 
-"/Library/Frameworks/Mono.framework/Versions/2.10.11/lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-icns.so"
+"/Library/Frameworks/Mono.framework/Versions/2.10.12/lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-icns.so"
 "icns" 4 "gdk-pixbuf" "The ICNS image format" "GPL"
 "image/x-icns" ""
 "icns" ""
 "icns" "" 100
 
-"/Library/Frameworks/Mono.framework/Versions/2.10.11/lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-ico.so"
+"/Library/Frameworks/Mono.framework/Versions/2.10.12/lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-ico.so"
 "ico" 5 "gdk-pixbuf" "The ICO image format" "LGPL"
 "image/x-icon" "image/x-ico" "image/x-win-bitmap" ""
 "ico" "cur" ""
 "  \001   " "zz znz" 100
 "  \002   " "zz znz" 100
 
-"/Library/Frameworks/Mono.framework/Versions/2.10.11/lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-jpeg.so"
+"/Library/Frameworks/Mono.framework/Versions/2.10.12/lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-jpeg.so"
 "jpeg" 5 "gdk-pixbuf" "The JPEG image format" "LGPL"
 "image/jpeg" ""
 "jpeg" "jpe" "jpg" ""
 "\377\330" "" 100
 
-"/Library/Frameworks/Mono.framework/Versions/2.10.11/lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-pcx.so"
+"/Library/Frameworks/Mono.framework/Versions/2.10.12/lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-pcx.so"
 "pcx" 4 "gdk-pixbuf" "The PCX image format" "LGPL"
 "image/x-pcx" ""
 "pcx" ""
@@ -51,13 +51,13 @@
 "\n\004\001" "" 100
 "\n\005\001" "" 100
 
-"/Library/Frameworks/Mono.framework/Versions/2.10.11/lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-png.so"
+"/Library/Frameworks/Mono.framework/Versions/2.10.12/lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-png.so"
 "png" 5 "gdk-pixbuf" "The PNG image format" "LGPL"
 "image/png" ""
 "png" ""
 "\211PNG\r\n\032\n" "" 100
 
-"/Library/Frameworks/Mono.framework/Versions/2.10.11/lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-pnm.so"
+"/Library/Frameworks/Mono.framework/Versions/2.10.12/lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-pnm.so"
 "pnm" 4 "gdk-pixbuf" "The PNM/PBM/PGM/PPM image format family" "LGPL"
 "image/x-portable-anymap" "image/x-portable-bitmap" "image/x-portable-graymap" "image/x-portable-pixmap" ""
 "pnm" "pbm" "pgm" "ppm" ""
@@ -68,27 +68,27 @@
 "P5" "" 100
 "P6" "" 100
 
-"/Library/Frameworks/Mono.framework/Versions/2.10.11/lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-qtif.so"
+"/Library/Frameworks/Mono.framework/Versions/2.10.12/lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-qtif.so"
 "qtif" 4 "gdk-pixbuf" "The QTIF image format" "LGPL"
 "image/x-quicktime" "image/qtif" ""
 "qtif" "qif" ""
 "abcdidsc" "xxxx    " 100
 "abcdidat" "xxxx    " 100
 
-"/Library/Frameworks/Mono.framework/Versions/2.10.11/lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-ras.so"
+"/Library/Frameworks/Mono.framework/Versions/2.10.12/lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-ras.so"
 "ras" 4 "gdk-pixbuf" "The Sun raster image format" "LGPL"
 "image/x-cmu-raster" "image/x-sun-raster" ""
 "ras" ""
 "Y\246j\225" "" 100
 
-"/Library/Frameworks/Mono.framework/Versions/2.10.11/lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-svg.so"
+"/Library/Frameworks/Mono.framework/Versions/2.10.12/lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-svg.so"
 "svg" 2 "gdk-pixbuf" "Scalable Vector Graphics" "LGPL"
 "image/svg+xml" "image/svg" "image/svg-xml" "image/vnd.adobe.svg+xml" "text/xml-svg" "image/svg+xml-compressed" ""
 "svg" "svgz" "svg.gz" ""
 " <svg" "*    " 100
 " <!DOCTYPE svg" "*             " 100
 
-"/Library/Frameworks/Mono.framework/Versions/2.10.11/lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-tga.so"
+"/Library/Frameworks/Mono.framework/Versions/2.10.12/lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-tga.so"
 "tga" 4 "gdk-pixbuf" "The Targa image format" "LGPL"
 "image/x-tga" ""
 "tga" "targa" ""
@@ -99,7 +99,7 @@
 "  \n" "xz " 100
 "  \013" "xz " 100
 
-"/Library/Frameworks/Mono.framework/Versions/2.10.11/lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-tiff.so"
+"/Library/Frameworks/Mono.framework/Versions/2.10.12/lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-tiff.so"
 "tiff" 1 "gdk-pixbuf" "The TIFF image format" "LGPL"
 "image/tiff" ""
 "tiff" "tif" ""
@@ -107,7 +107,7 @@
 "II* " "   z" 100
 "II* \020   CR\002 " "   z zzz   z" 0
 
-"/Library/Frameworks/Mono.framework/Versions/2.10.11/lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-wbmp.so"
+"/Library/Frameworks/Mono.framework/Versions/2.10.12/lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-wbmp.so"
 "wbmp" 4 "gdk-pixbuf" "The WBMP image format" "LGPL"
 "image/vnd.wap.wbmp" ""
 "wbmp" ""
@@ -116,14 +116,14 @@
 " @" "z " 1
 "  " "z " 1
 
-"/Library/Frameworks/Mono.framework/Versions/2.10.11/lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-xbm.so"
+"/Library/Frameworks/Mono.framework/Versions/2.10.12/lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-xbm.so"
 "xbm" 4 "gdk-pixbuf" "The XBM image format" "LGPL"
 "image/x-xbitmap" ""
 "xbm" ""
 "#define " "" 100
 "/*" "" 50
 
-"/Library/Frameworks/Mono.framework/Versions/2.10.11/lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-xpm.so"
+"/Library/Frameworks/Mono.framework/Versions/2.10.12/lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-xpm.so"
 "xpm" 4 "gdk-pixbuf" "The XPM image format" "LGPL"
 "image/x-xpixmap" ""
 "xpm" ""
