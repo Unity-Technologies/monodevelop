@@ -99,7 +99,7 @@ namespace MonoDevelop.Debugger.Soft
 				try {
 					baseProcessName = Path.GetFileName (process.ProcessName);
 					if (baseProcessName.Equals ("mono", StringComparison.OrdinalIgnoreCase))
-						infos.Add (new ProcessInfo (process.Id, string.Format ("{0} ({1})", process.MainWindowTitle, baseProcessName)));
+						infos.Add (new ProcessInfo (process.Id, process.MainWindowTitle != "null" ? string.Format ("{0} ({1})", process.MainWindowTitle, baseProcessName) : baseProcessName));
 				} catch {
 					// This can fail, but it doesn't matter
 				}
