@@ -114,12 +114,18 @@ namespace MonoDevelop.Debugger
 					} catch (Exception ex) {
 						LoggingService.LogError ("Could not get attachable processes.", ex);
 					}
-					comboDebs.AppendText (de.Name);
 				}
 
 				threadFinished = true;		
 			});
+
+			foreach (DebuggerEngine de in DebuggingService.GetDebuggerEngines ()) {
+				if ((de.SupportedFeatures & DebuggerFeatures.Attaching) == 0)
+					continue;
 		
+				comboDebs.AppendText (de.Name);
+			}
+
 			FillList ();
 			
 			return true;
