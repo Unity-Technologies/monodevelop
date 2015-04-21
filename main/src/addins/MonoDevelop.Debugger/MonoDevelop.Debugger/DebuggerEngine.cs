@@ -25,6 +25,7 @@
 // THE SOFTWARE.
 
 using System;
+using System.Diagnostics;
 using MonoDevelop.Core;
 using Mono.Debugging.Client;
 using MonoDevelop.Core.Execution;
@@ -82,11 +83,11 @@ namespace MonoDevelop.Debugger
 			return engine.CreateDebuggerStartInfo (cmd);
 		}
 		
-		public ProcessInfo[] GetAttachableProcesses ()
+		public ProcessInfo[] GetAttachableProcesses (Process[] processes)
 		{
 			LoadEngine ();
 			if (engine != null)
-				return engine.GetAttachableProcesses ();
+				return engine.GetAttachableProcesses (processes);
 			else
 				return new ProcessInfo [0];
 		}
