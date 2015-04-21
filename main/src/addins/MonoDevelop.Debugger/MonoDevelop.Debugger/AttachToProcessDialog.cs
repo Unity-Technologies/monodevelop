@@ -26,6 +26,7 @@
 //
 
 using System;
+using System.Diagnostics;
 using System.Collections.Generic;
 using MonoDevelop.Core;
 using MonoDevelop.Components;
@@ -94,11 +95,13 @@ namespace MonoDevelop.Debugger
 				threadProcEngines = new Dictionary<long,List<DebuggerEngine>> ();
 				threadProcs = new List<ProcessInfo>();
 
+				var processes = Process.GetProcesses();
+
 				foreach (DebuggerEngine de in DebuggingService.GetDebuggerEngines ()) {
 					if ((de.SupportedFeatures & DebuggerFeatures.Attaching) == 0)
 						continue;
 					try {
-						var infos = de.GetAttachableProcesses ();
+						var infos = de.GetAttachableProcesses (processes);
 						foreach (ProcessInfo pi in infos) {
 							List<DebuggerEngine> engs;
 							if (!threadProcEngines.TryGetValue (pi.Id, out engs)) {
