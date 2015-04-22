@@ -55,7 +55,7 @@ namespace MonoDevelop.Debugger.Soft
 			return new CustomSoftDebuggerSession ();
 		}
 		
-		public ProcessInfo[] GetAttachableProcesses ()
+		public ProcessInfo[] GetAttachableProcesses (Process[] processes)
 		{
 			return new ProcessInfo[0];
 		}
