@@ -25,6 +25,7 @@
 // THE SOFTWARE.
 
 using System;
+using System.Diagnostics;
 using System.Collections.Generic;
 using System.IO;
 using MonoDevelop.Debugger;
@@ -107,7 +108,7 @@ namespace MonoDevelop.Debugger.Soft.AspNet
 			return new SoftDebuggerSession ();
 		}
 		
-		public ProcessInfo[] GetAttachableProcesses ()
+		public ProcessInfo[] GetAttachableProcesses (Process[] processes)
 		{
 			return new ProcessInfo[0];
 		}

@@ -26,6 +26,7 @@
 //
 
 using System;
+using System.Diagnostics;
 using Mono.Debugging.Client;
 using MonoDevelop.Core.Execution;
 
@@ -35,7 +36,7 @@ namespace MonoDevelop.Debugger
 	{
 		bool CanDebugCommand (ExecutionCommand cmd);
 		DebuggerStartInfo CreateDebuggerStartInfo (ExecutionCommand cmd);
-		ProcessInfo[] GetAttachableProcesses ();
+		ProcessInfo[] GetAttachableProcesses (Process[] processses);
 		DebuggerSession CreateSession ();
 	}
 }

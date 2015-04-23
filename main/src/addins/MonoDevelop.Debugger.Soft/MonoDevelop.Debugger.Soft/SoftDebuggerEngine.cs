@@ -90,16 +90,16 @@ namespace MonoDevelop.Debugger.Soft
 			return dsi;
 		}
 		
-		public ProcessInfo[] GetAttachableProcesses ()
+		public ProcessInfo[] GetAttachableProcesses (Process[] processes)
 		{
 			var infos = new List<ProcessInfo> ();
 			string baseProcessName;
 			
-			foreach (var process in Process.GetProcesses ()) {
+			foreach (var process in processes) {
 				try {
 					baseProcessName = Path.GetFileName (process.ProcessName);
 					if (baseProcessName.Equals ("mono", StringComparison.OrdinalIgnoreCase))
-						infos.Add (new ProcessInfo (process.Id, string.Format ("{0} ({1})", process.MainWindowTitle, baseProcessName)));
+						infos.Add (new ProcessInfo (process.Id, process.MainWindowTitle != "null" ? string.Format ("{0} ({1})", process.MainWindowTitle, baseProcessName) : baseProcessName));
 				} catch {
 					// This can fail, but it doesn't matter
 				}
