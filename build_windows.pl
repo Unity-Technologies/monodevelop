@@ -5,9 +5,12 @@ use File::Basename qw(dirname basename fileparse);
 use File::Spec;
 use File::Copy;
 use File::Path;
+use Digest::MD5;
 
 my $GTK_VERSION = "2.12";
-my $GTK_INSTALLER = "gtk-sharp-2.12.20.msi";
+my $GTK_INSTALLER = "gtk-sharp-2.12.22.msi";
+my $GTK_SHARP_DLL_MD5 = "4ffdcbd3b4f3b602f1599b3c0cad9419";
+
 my $MONO_LIBRARIES_VERSION = "2.6";
 my $MONO_LIBRARIES_INSTALLER = "MonoLibraries.msi";
 my $SevenZip = '"C:\Program Files (x86)\7-Zip\7z"';
@@ -45,7 +48,18 @@ else
 	print "== Mono Libraries $MONO_LIBRARIES_VERSION already installed\n";
 }
 
-if (!-e "$gtkPath/bin/libjpeg-8.dll")
+my $gtkSharpDll = "$gtkPath/lib/gtk-sharp-2.0/gtk-sharp.dll";
+my $gtkSharpDllMD5 = "";
+
+
+if (-e "$gtkSharpDll")
+{
+	open my $fh, '<', "$gtkSharpDll";
+	$gtkSharpDllMD5 = Digest::MD5->new->addfile($fh)->hexdigest;
+	close $fh;
+}
+
+if (!-e "$gtkSharpDll" or $gtkSharpDllMD5 ne $GTK_SHARP_DLL_MD5)
 {
 	print "== Installing GTK Sharp $GTK_VERSION. The machine must be restarted for it to work properly.\n";
 	system("msiexec /i $root\\monodevelop\\dependencies\\$GTK_INSTALLER /passive /promptrestart") && die("Failed to install GTK");
