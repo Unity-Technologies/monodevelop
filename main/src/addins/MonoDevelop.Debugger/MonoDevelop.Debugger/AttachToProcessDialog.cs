@@ -71,7 +71,7 @@ namespace MonoDevelop.Debugger
 			if (store.GetIterFirst (out it))
 				tree.Selection.SelectIter (it);
 			
-			timeoutHandler = GLib.Timeout.Add (100, Refresh);
+			timeoutHandler = GLib.Timeout.Add (1000, Refresh);
 		}
 		
 		public override void Destroy ()
