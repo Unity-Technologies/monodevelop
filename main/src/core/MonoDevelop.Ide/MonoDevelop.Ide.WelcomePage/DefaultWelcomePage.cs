@@ -39,30 +39,32 @@ namespace MonoDevelop.Ide.WelcomePage
 			var mainAlignment = new Gtk.Alignment (0.5f, 0.5f, 0f, 1f);
 
 			var mainCol = new WelcomePageColumn ();
+			mainCol.MinWidth = 600;
 			mainAlignment.Add (mainCol);
 
-			var row1 = new WelcomePageRow ();
-			row1.PackStart (new WelcomePageButtonBar (
-				new WelcomePageBarButton ("MonoDevelop.com", "http://www.monodevelop.com", "link-cloud.png"),
-				new WelcomePageBarButton (GettextCatalog.GetString ("Documentation"), "http://www.go-mono.com/docs", "link-info.png"),
-				new WelcomePageBarButton (GettextCatalog.GetString ("Support"), "http://monodevelop.com/index.php?title=Help_%26_Contact", "link-heart.png"),
-				new WelcomePageBarButton (GettextCatalog.GetString ("Q&A"), "http://stackoverflow.com/questions/tagged/monodevelop", "link-chat.png")
-				)
-			);
-			mainCol.PackStart (row1, false, false, 0);
+//			var row1 = new WelcomePageRow ();
+//			row1.PackStart (new WelcomePageButtonBar (
+//				new WelcomePageBarButton ("MonoDevelop.com", "http://www.monodevelop.com", "link-cloud.png"),
+//				new WelcomePageBarButton (GettextCatalog.GetString ("Documentation"), "http://www.go-mono.com/docs", "link-info.png"),
+//				new WelcomePageBarButton (GettextCatalog.GetString ("Support"), "http://monodevelop.com/index.php?title=Help_%26_Contact", "link-heart.png"),
+//				new WelcomePageBarButton (GettextCatalog.GetString ("Q&A"), "http://stackoverflow.com/questions/tagged/monodevelop", "link-chat.png")
+//				)
+//			);
+//			mainCol.PackStart (row1, false, false, 0);
+			mainCol.PackStart (new WelcomePageRecentProjectsList (GettextCatalog.GetString ("Solutions")), true, true, 20);
 
-			var row2 = new WelcomePageRow (
-				new WelcomePageColumn (
-				new WelcomePageRecentProjectsList (GettextCatalog.GetString ("Solutions"))
-				),
-				new WelcomePageColumn (
-					new WelcomePageNewsFeed (GettextCatalog.GetString ("Xamarin News"), "http://software.xamarin.com/Service/News", "NewsLinks")
-				),
-				new WelcomePageColumn (
-					new WelcomePageTipOfTheDaySection ()
-				)
-			);
-			mainCol.PackStart (row2, false, false, 0);
+//			var row2 = new WelcomePageRow (
+//				new WelcomePageColumn (
+//				new WelcomePageRecentProjectsList (GettextCatalog.GetString ("Solutions"))
+//				),
+//				new WelcomePageColumn (
+//					new WelcomePageNewsFeed (GettextCatalog.GetString ("Xamarin News"), "http://software.xamarin.com/Service/News", "NewsLinks")
+//				),
+//				new WelcomePageColumn (
+//					new WelcomePageTipOfTheDaySection ()
+//				)
+//			);
+//			mainCol.PackStart (row2, false, false, 0);
 
 			parent.Add (mainAlignment);
 		}
