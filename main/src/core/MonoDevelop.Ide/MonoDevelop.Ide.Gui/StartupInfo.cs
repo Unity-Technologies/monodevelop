@@ -62,7 +62,7 @@ namespace MonoDevelop.Ide.Gui
 		/// Matches a filename string with optional line and column 
 		/// (/foo/bar/blah.cs;22;31)
 		/// </summary>
-		public static readonly Regex FileExpression = new Regex (@"^(?<filename>[^;]+)(;(?<line>\d+))?(;(?<column>\d+))?$", RegexOptions.Compiled);
+		public static readonly Regex FileExpression = new Regex (@"^(?<filename>[^;]+)(;(?<line>-?\d+))?(;(?<column>-?\d+))?$", RegexOptions.Compiled);
 		
 		public StartupInfo (IEnumerable<string> args)
 		{
