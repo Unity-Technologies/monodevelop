@@ -60,7 +60,7 @@ namespace MonoDevelop.Ide
 		ArrayList errorsList = new ArrayList ();
 		bool initialized;
 		internal static string DefaultTheme;
-		static readonly int ipcBasePort = 40000;
+		static readonly int ipcBasePort = 41000;
 		
 		int IApplication.Run (string[] args)
 		{
@@ -141,12 +141,12 @@ namespace MonoDevelop.Ide
 			if (!options.NewWindow && startupInfo.HasFiles) {
 				Counters.Initialization.Trace ("Pre-Initializing Runtime to load files in existing window");
 				Runtime.Initialize (true);
-				foreach (var file in startupInfo.RequestedFileList) {
-					if (MonoDevelop.Projects.Services.ProjectService.IsWorkspaceItemFile (file.FileName)) {
-						options.NewWindow = true;
-						break;
-					}
-				}
+//				foreach (var file in startupInfo.RequestedFileList) {
+//					if (MonoDevelop.Projects.Services.ProjectService.IsWorkspaceItemFile (file.FileName)) {
+//						options.NewWindow = true;
+//						break;
+//					}
+//				}
 			}
 			
 			Counters.Initialization.Trace ("Initializing Runtime");
