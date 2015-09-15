@@ -260,7 +260,7 @@
 		</ItemSet>
 		<SeparatorItem id = "Separator3" />
 		<CommandItem id = "MonoDevelop.Ide.Commands.HelpCommands.OpenLogDirectory" />
-		<LinkItem id = "ReportBug" _label = "Report a Bug" link = "http://xamar.in/r/file_studio_bug" />
+<!---	<LinkItem id = "ReportBug" _label = "Report a Bug" link = "http://xamar.in/r/file_studio_bug" /> -->
 		<Condition id = "Platform" value = "!mac">
 			<CommandItem id = "MonoDevelop.Ide.Commands.HelpCommands.About" />
 		</Condition>
