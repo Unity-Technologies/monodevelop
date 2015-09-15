@@ -369,10 +369,10 @@ namespace MonoDevelop.Ide.Gui.Pads
 			
 			var group = new ActionGroup ("Popup");
 
-			var help = new Gtk.Action ("help", GettextCatalog.GetString ("Show Error Reference"),
-				GettextCatalog.GetString ("Show Error Reference"), Gtk.Stock.Help);
-			help.Activated += OnShowReference;
-			group.Add (help, "F1");
+//			var help = new Gtk.Action ("help", GettextCatalog.GetString ("Show Error Reference"),
+//				GettextCatalog.GetString ("Show Error Reference"), Gtk.Stock.Help);
+//			help.Activated += OnShowReference;
+//			group.Add (help, "F1");
 
 			var copy = new Gtk.Action ("copy", GettextCatalog.GetString ("_Copy"),
 				GettextCatalog.GetString ("Copy task"), Gtk.Stock.Copy);
@@ -441,7 +441,7 @@ namespace MonoDevelop.Ide.Gui.Pads
 			uiManager.InsertActionGroup (group, 0);
 			
 			string uiStr = "<ui><popup name='popup'>"
-				+ "<menuitem action='help'/>"
+//				+ "<menuitem action='help'/>"
 				+ "<menuitem action='copy'/>"
 				+ "<menuitem action='jump'/>"
 				+ "<separator/>"
@@ -480,7 +480,7 @@ namespace MonoDevelop.Ide.Gui.Pads
 						columnFile.Active ||
 						columnPath.Active);
 				string dummyString;
-				help.Sensitive &= GetSelectedErrorReference (out dummyString);
+				// help.Sensitive &= GetSelectedErrorReference (out dummyString);
 			};
 			
 			return menu;
