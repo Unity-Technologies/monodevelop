@@ -221,7 +221,7 @@ namespace MonoDevelop.Ide
 			if (Platform.IsMac && p.FullPath.ToString().Contains(' '))
 			{
 				// Will be fixed once this fix: https://github.com/mono/mono/pull/2062 makes into a OSX Mono framework release and we can update the bundled framework.
-				string message = BrandingService.BrandApplicationName (GettextCatalog.GetString ("Copy MonoDevelop to a path without spaces. This requirement will be fixed in the future."));
+				string message = BrandingService.BrandApplicationName (GettextCatalog.GetString ("Copy MonoDevelop to a path without spaces. This will requirement will be fixed in the future."));
 				MessageService.ShowFatalError (message, "Current path: " + p.ParentDirectory.FullPath, null);
 				return 1;
 			}
