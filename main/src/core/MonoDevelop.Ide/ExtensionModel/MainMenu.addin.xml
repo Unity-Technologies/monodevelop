@@ -241,7 +241,7 @@
 	</ItemSet> 
 
 	<ItemSet id = "Help" _label = "_Help">
-		<CommandItem id = "MonoDevelop.Ide.Commands.HelpCommands.Help" />
+<!--		<CommandItem id = "MonoDevelop.Ide.Commands.HelpCommands.Help" /> -->
 		<CommandItem id = "MonoDevelop.Ide.Commands.HelpCommands.TipOfTheDay" />
 		<CommandItem id = "MonoDevelop.Ide.Commands.HelpCommands.SendFeedback" />
 		<Condition id = "Platform" value = "!mac">
