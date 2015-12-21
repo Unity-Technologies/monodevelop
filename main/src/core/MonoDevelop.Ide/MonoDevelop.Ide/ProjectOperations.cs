@@ -109,7 +109,7 @@ namespace MonoDevelop.Ide
 			get {
 				return currentWorkspaceItem;
 			}
-			internal set {
+			set {
 				if (value != currentWorkspaceItem) {
 					WorkspaceItem oldValue = currentWorkspaceItem;
 					currentWorkspaceItem = value;
@@ -125,7 +125,7 @@ namespace MonoDevelop.Ide
 					return CurrentSelectedSolution.RootFolder;
 				return currentSolutionItem;
 			}
-			internal set {
+			set {
 				if (value != currentSolutionItem) {
 					SolutionItem oldValue = currentSolutionItem;
 					currentSolutionItem = value;
@@ -139,7 +139,7 @@ namespace MonoDevelop.Ide
 			get {
 				return currentItem;
 			}
-			internal set {
+			set {
 				currentItem = value;
 			}
 		}
