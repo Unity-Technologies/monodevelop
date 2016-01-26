@@ -154,7 +154,8 @@ namespace MonoDevelop.Ide.Projects
 //			dlg.AddFilter (GettextCatalog.GetString ("Assemblies"), "*.[Dd][Ll][Ll]", "*.[Ee][Xx][Ee]");
 			dlg.AddFilter (GettextCatalog.GetString ("Assemblies"), "*.dll", "*.exe");
 			dlg.CurrentFolder = basePath;
-
+			dlg.SelectMultiple = true;
+			dlg.TransientFor = selectDialog;
 			if (dlg.Run ()) {
 				basePath = dlg.CurrentFolder;
 				foreach (string file in dlg.SelectedFiles) {

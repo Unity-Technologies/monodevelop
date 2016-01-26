@@ -78,6 +78,8 @@ namespace MonoDevelop.Ide
 			//ensure native libs initialized before we hit anything that p/invokes
 			Platform.Initialize ();
 
+			LoggingService.LogInfo ("Operating System: {0}", SystemInformation.GetOperatingSystemDescription ());
+
 			IdeApp.Customizer = options.IdeCustomizer ?? new IdeCustomizer ();
 			IdeApp.Customizer.Initialize ();
 
@@ -228,9 +230,10 @@ namespace MonoDevelop.Ide
 				ImageService.Initialize ();
 				
 				if (errorsList.Count > 0) {
-					AddinLoadErrorDialog dlg = new AddinLoadErrorDialog ((AddinError[]) errorsList.ToArray (typeof(AddinError)), false);
-					if (!dlg.Run ())
-						return 1;
+					using (AddinLoadErrorDialog dlg = new AddinLoadErrorDialog ((AddinError[]) errorsList.ToArray (typeof(AddinError)), false)) {
+						if (!dlg.Run ())
+							return 1;
+					}
 					reportedFailures = errorsList.Count;
 				}
 
@@ -270,8 +273,8 @@ namespace MonoDevelop.Ide
 			}
 
 			if (errorsList.Count > reportedFailures) {
-				AddinLoadErrorDialog dlg = new AddinLoadErrorDialog ((AddinError[]) errorsList.ToArray (typeof(AddinError)), true);
-				dlg.Run ();
+				using (AddinLoadErrorDialog dlg = new AddinLoadErrorDialog ((AddinError[]) errorsList.ToArray (typeof(AddinError)), true))
+					dlg.Run ();
 			}
 			
 			errorsList = null;
@@ -757,6 +760,10 @@ namespace MonoDevelop.Ide
 				Console.WriteLine (BrandingService.ApplicationName + " " + BuildInfo.VersionLabel);
 				Console.WriteLine ("Options:");
 				optSet.WriteOptionDescriptions (Console.Out);
+				const string openFileText = "      file.ext;line;column";
+				Console.Write (openFileText);
+				Console.Write (new string (' ', 29 - openFileText.Length));
+				Console.WriteLine ("Opens a file at specified integer line and column");
 			}
 			
 			return opt;

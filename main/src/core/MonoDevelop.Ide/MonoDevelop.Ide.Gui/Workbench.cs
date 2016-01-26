@@ -630,6 +630,7 @@ namespace MonoDevelop.Ide.Gui
 				}
 			} finally {
 				ops.Destroy ();
+				ops.Dispose ();
 			}
 		}
 		
@@ -652,6 +653,7 @@ namespace MonoDevelop.Ide.Gui
 				MessageService.RunCustomDialog (ops, parentWindow);
 			} finally {
 				ops.Destroy ();
+				ops.Dispose ();
 			}
 		}
 		
@@ -824,12 +826,8 @@ namespace MonoDevelop.Ide.Gui
 				monitor.ReportError (GettextCatalog.GetString ("Invalid file name"), null);
 				return;
 			}
-			
-			if (origName.StartsWith ("file://", StringComparison.Ordinal))
-				fileName = new Uri (origName).LocalPath;
-			else
-				fileName = origName;
-			
+
+			fileName = openFileInfo.FileName;
 			if (!origName.StartsWith ("http://", StringComparison.Ordinal))
 				fileName = fileName.FullPath;
 			
@@ -1270,7 +1268,7 @@ namespace MonoDevelop.Ide.Gui
 				return fileName;
 			}
 			set {
-				fileName = value.CanonicalPath.ResolveFullPath ();
+				fileName = value.CanonicalPath.ResolveLinks ();
 				if (fileName.IsNullOrEmpty)
 					LoggingService.LogError ("FileName == null\n" + Environment.StackTrace);
 			}

@@ -5,7 +5,7 @@
 	<TemplateConfiguration>
 		<_Name>NUnit Library Project</_Name>
 		<Category>other/net/general</Category>
-		<Icon>md-project|res:project-nunit-overlay-light-32.png</Icon>
+		<Icon>md-project|res:project-nunit-overlay-32.png</Icon>
 		<Image id="md-nunit-library-project" />
 		<_Description>Creates an NUnit library</_Description>
 		<LanguageName>VBNet</LanguageName>
@@ -32,7 +32,7 @@
 			</References>
 
 			<Packages>
-				<Package ID="NUnit" Version="2.6.3" />
+				<Package ID="NUnit" Version="2.6.4" />
 			</Packages>
 
 			<Files>

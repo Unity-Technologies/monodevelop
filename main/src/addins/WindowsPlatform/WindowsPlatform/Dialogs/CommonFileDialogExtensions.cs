@@ -50,6 +50,7 @@ namespace MonoDevelop.Platform
 				dialog.Title = data.Title;
 
 			dialog.InitialDirectory = data.CurrentFolder;
+			dialog.ShowHiddenItems = data.ShowHidden;
 
 			var fileDialog = dialog as CommonOpenFileDialog;
 			if (fileDialog != null) {

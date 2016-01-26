@@ -28,6 +28,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using MonoDevelop.Ide.Projects;
 using MonoDevelop.Projects;
 
 namespace MonoDevelop.Ide.Templates
@@ -60,29 +61,29 @@ namespace MonoDevelop.Ide.Templates
 
 		List<string> supportedParameters;
 
-		internal void UpdateSupportedParameters (string parameters)
+		internal void UpdateParameters (SolutionTemplate template)
 		{
-			if (String.IsNullOrEmpty (parameters)) {
-				supportedParameters = null;
-				return;
-			}
+			Parameters ["TemplateName"] = template.Name;
+			UpdateSupportedParameters (template.SupportedParameters);
+			UpdateDefaultParameters (template.DefaultParameters);
+		}
 
+		void UpdateSupportedParameters (string parameters)
+		{
 			supportedParameters = new List<string> ();
-			foreach (string part in parameters.Split (new [] {',', ';'}, StringSplitOptions.RemoveEmptyEntries)) {
-				supportedParameters.Add (part.Trim ());
+			if (!string.IsNullOrEmpty (parameters)) {
+				foreach (string part in parameters.Split (new [] {',', ';'}, StringSplitOptions.RemoveEmptyEntries)) {
+					supportedParameters.Add (part.Trim ());
+				}
 			}
 		}
 
 		public bool IsSupportedParameter (string name)
 		{
-			if (supportedParameters == null) {
-				return true;
-			}
-
 			return supportedParameters.Contains (name);
 		}
 
-		internal void UpdateDefaultParameters (string parameters)
+		void UpdateDefaultParameters (string parameters)
 		{
 			if (String.IsNullOrEmpty (parameters)) {
 				return;
@@ -101,6 +102,11 @@ namespace MonoDevelop.Ide.Templates
 
 		public virtual void ItemsCreated (IEnumerable<IWorkspaceFileObject> items)
 		{
+		}
+
+		public virtual IEnumerable<ProjectConfigurationControl> GetFinalPageControls ()
+		{
+			return Enumerable.Empty <ProjectConfigurationControl> ();
 		}
 	}
 }

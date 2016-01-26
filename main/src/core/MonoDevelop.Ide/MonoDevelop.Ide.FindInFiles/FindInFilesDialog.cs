@@ -37,6 +37,12 @@ using MonoDevelop.Ide.Gui.Content;
 
 namespace MonoDevelop.Ide.FindInFiles
 {
+	public enum PathMode {
+		Absolute,
+		Relative,
+		Hidden
+	}
+
 	public partial class FindInFilesDialog : Gtk.Dialog
 	{
 		readonly bool writeScope = true;
@@ -140,8 +146,13 @@ namespace MonoDevelop.Ide.FindInFiles
 			properties = PropertyService.Get ("MonoDevelop.FindReplaceDialogs.SearchOptions", new Properties ());
 			SetButtonIcon (toggleReplaceInFiles, "gtk-find-and-replace");
 			SetButtonIcon (toggleFindInFiles, "gtk-find");
-			
-			TransientFor = IdeApp.Workbench.RootWindow;
+
+			// If we have an active floating window, attach the dialog to it. Otherwise use the main IDE window.
+			var current_toplevel = Gtk.Window.ListToplevels ().Where (x => x.IsActive).First ();
+			if (current_toplevel is Components.DockNotebook.DockWindow)
+				TransientFor = current_toplevel;
+			else
+				TransientFor = IdeApp.Workbench.RootWindow;
 
 			toggleReplaceInFiles.Active = showReplace;
 			toggleFindInFiles.Active = !showReplace;
@@ -668,9 +679,17 @@ namespace MonoDevelop.Ide.FindInFiles
 
 			switch ((SearchScope) comboboxScope.Active) {
 			case SearchScope.CurrentDocument:
+				if (IdeApp.Workbench.ActiveDocument == null) {
+					MessageService.ShowError (GettextCatalog.GetString ("Currently there is no open document."));
+					return null;
+				}
 				scope = new DocumentScope ();
 				break;
 			case SearchScope.Selection:
+				if (IdeApp.Workbench.ActiveDocument == null) {
+					MessageService.ShowError (GettextCatalog.GetString ("Currently there is no open document."));
+					return null;
+				}
 				scope = new SelectionScope ();
 				break;
 			case SearchScope.WholeWorkspace:
@@ -699,6 +718,10 @@ namespace MonoDevelop.Ide.FindInFiles
 				MessageService.ShowError (GettextCatalog.GetString ("Currently there is no open solution."));
 				return null;
 			case SearchScope.AllOpenFiles:
+				if (IdeApp.Workbench.Documents.Count == 0) {
+					MessageService.ShowError (GettextCatalog.GetString ("Currently there are no open documents."));
+					return null;
+				}
 				scope = new AllOpenFilesScope ();
 				break;
 			case SearchScope.Directories: 
@@ -789,6 +812,9 @@ namespace MonoDevelop.Ide.FindInFiles
 
 			ThreadPool.QueueUserWorkItem (delegate {
 				using (ISearchProgressMonitor searchMonitor = IdeApp.Workbench.ProgressMonitors.GetSearchProgressMonitor (true)) {
+
+					searchMonitor.PathMode = scope.PathMode;
+
 					searchMonitor.ReportStatus (scope.GetDescription (options, pattern, null));
 
 					lock (searchesInProgress)

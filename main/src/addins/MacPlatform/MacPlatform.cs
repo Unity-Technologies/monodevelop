@@ -125,8 +125,8 @@ namespace MonoDevelop.MacIntegration
 		public override Xwt.Toolkit LoadNativeToolkit ()
 		{
 			var path = Path.GetDirectoryName (GetType ().Assembly.Location);
-			System.Reflection.Assembly.LoadFrom (Path.Combine (path, "Xwt.Mac.dll"));
-			var loaded = Xwt.Toolkit.Load (Xwt.ToolkitType.Cocoa);
+			System.Reflection.Assembly.LoadFrom (Path.Combine (path, "Xwt.XamMac.dll"));
+			var loaded = Xwt.Toolkit.Load (Xwt.ToolkitType.XamMac);
 
 			// We require Xwt.Mac to initialize MonoMac before we can execute any code using MonoMac
 			timer.Trace ("Installing App Event Handlers");
@@ -315,12 +315,7 @@ namespace MonoDevelop.MacIntegration
 					}}
 				}}
 
-        style ""menu-item"" {{
-          bg[SELECTED] = ""{0}""
-        }}
-
 				widget_class ""*.<GtkTreeView>*"" style ""treeview""
-        widget_class ""*.<GtkMenuItem>*"" style ""menu-item""
 				",
 				color_hex,
 				text_hex
@@ -841,6 +836,15 @@ namespace MonoDevelop.MacIntegration
 				desktopBounds = desktopBounds.Union (new Gdk.Rectangle ((int)r.X, (int)r.Y, (int)r.Width, (int)r.Height));
 			}
 			return desktopBounds;
+		}
+
+		public override void OpenFolder (FilePath folderPath, FilePath[] selectFiles)
+		{
+			if (selectFiles.Length == 0) {
+				System.Diagnostics.Process.Start (folderPath);
+			} else {
+				NSWorkspace.SharedWorkspace.ActivateFileViewer (selectFiles.Select ((f) => NSUrl.FromFilename (f)).ToArray ());
+			}
 		}
 	}
 }
