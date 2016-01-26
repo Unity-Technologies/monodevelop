@@ -7,7 +7,7 @@ ADDINS=$(MAC_APP_LIB_DIR)/AddIns
 EXTRAS=$(top_srcdir)/../extras
 ARTIFACTS=$(top_srcdir)/../../artifacts
 MD_CONFIGURE=$(top_srcdir)/../scripts/configure.sh
-SDK_PATH=$(shell xcrun --sdk macosx10.8 --show-sdk-path)
+#SDK_PATH=$(shell xcrun --sdk macosx10.8 --show-sdk-path)
 
 PACKAGE_UPDATE_ID=$(shell $(MD_CONFIGURE) get-releaseid)
 BUNDLE_VERSION=$(shell $(MD_CONFIGURE) get-version)
@@ -16,7 +16,7 @@ CLEANFILES = render.exe
 #DISTCLEANFILES =
 EXTRA_DIST = dmg-bg.png DS_Store Info.plist.in make-dmg-bundle.sh render.cs
 
-all: app
+all: monostub monostub-test
 
 render.exe: render.cs
 	gmcs -r:System.Drawing render.cs
@@ -25,13 +25,19 @@ dmg: render.exe app
 	./make-dmg-bundle.sh
 
 monostub: monostub.m $(MONOSTUB_EXTRA_SOURCES)
-	gcc -Wall -mmacosx-version-min=10.6 -m32 -o $@ $^ -framework AppKit -isysroot $(SDK_PATH)
+	gcc -Wall -mmacosx-version-min=10.10 -m32 -o $@ $^ -framework AppKit
+#	gcc -Wall -mmacosx-version-min=10.10 -m32 -o $@ $^ -framework AppKit -isysroot $(SDK_PATH)
+	cp monostub ../bin/MonoDevelop
+
+monostub-test: monostub-test.m $(MONOSTUB_EXTRA_SOURCES)
+	gcc -g -Wall -mmacosx-version-min=10.10 -m32 -o $@ $^ -framework AppKit
+	./monostub-test
 
 clean-local:
 	rm -rf MonoDevelop.app
 	rm -f MonoDevelop*.dmg
 
-app: monostub
+app: monostub monostub-test
 	@echo ""
 	@echo "Creating directories in app bundle"
 	@echo ""

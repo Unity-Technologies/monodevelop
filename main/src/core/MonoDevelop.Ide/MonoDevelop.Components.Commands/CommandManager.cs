@@ -31,6 +31,7 @@ using System;
 using System.Reflection;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 using MonoDevelop.Components.Commands.ExtensionNodes;
 using Mono.TextEditor;
@@ -310,6 +311,28 @@ namespace MonoDevelop.Components.Commands
 		#if MAC
 		AppKit.NSEvent OnNSEventKeyPress (AppKit.NSEvent ev)
 		{
+			// If we have a native window that can handle this command, let it process
+			// the keys itself and do not go through the command manager.
+			// Events in Gtk windows do not pass through here except when they're done
+			// in native NSViews. PerformKeyEquivalent for them will not return true,
+			// so we're always going to fallback to the command manager for them.
+			// If no window is focused, it's probably because a gtk window had focus
+			// and the focus didn't go to any other window on close. (debug popup on hover
+			// that gets closed on unhover). So if no keywindow is focused, events will
+			// pass through here and let us use the command manager.
+			var window = AppKit.NSApplication.SharedApplication.KeyWindow;
+			if (window != null) {
+				// Try the handler in the native window.
+				if (window.PerformKeyEquivalent (ev))
+					return null;
+
+				// If the window is a gtk window and is registered in the command manager
+				// process the events through the handler.
+				var gtkWindow = MonoDevelop.Components.Mac.GtkMacInterop.GetGtkWindow (window);
+				if (gtkWindow != null && !TopLevelWindowStack.Contains (gtkWindow))
+					return null;
+			}
+
 			var gdkev = MonoDevelop.Components.Mac.GtkMacInterop.ConvertKeyEvent (ev);
 			if (gdkev != null) {
 				if (ProcessKeyEvent (gdkev))
@@ -372,7 +395,8 @@ namespace MonoDevelop.Components.Commands
 				NotifyKeyPressed (ev);
 				return false;
 			}
-			
+
+			var toplevelFocus = IdeApp.Workbench.HasToplevelFocus;
 			bool bypass = false;
 			for (int i = 0; i < commands.Count; i++) {
 				CommandInfo cinfo = GetCommandInfo (commands[i].Id, new CommandTargetRoute ());
@@ -380,6 +404,7 @@ namespace MonoDevelop.Components.Commands
 					bypass = true;
 					continue;
 				}
+
 				if (cinfo.Enabled && cinfo.Visible && DispatchCommand (commands[i].Id, CommandSource.Keybinding))
 					return result;
 			}
@@ -735,7 +760,27 @@ namespace MonoDevelop.Components.Commands
 		/// </param>
 		public AppKit.NSMenu CreateNSMenu (CommandEntrySet entrySet, object initialTarget)
 		{
-			return new MonoDevelop.Components.Mac.MDMenu (this, entrySet, CommandSource.ContextMenu, initialTarget);
+			return CreateNSMenu (entrySet, initialTarget, null);
+		}
+
+		/// <summary>
+		/// Creates the menu.
+		/// </summary>
+		/// <returns>
+		/// The menu.
+		/// </returns>
+		/// <param name='entrySet'>
+		/// Entry with the command definitions
+		/// </param>
+		/// <param name='initialTarget'>
+		/// Initial command route target. The command handler will start looking for command handlers in this object.
+		/// </param>
+		/// <param name='closeHandler'>
+		/// EventHandler to be run when the menu closes
+		/// </param>
+		public AppKit.NSMenu CreateNSMenu (CommandEntrySet entrySet, object initialTarget, EventHandler closeHandler)
+		{
+			return new MonoDevelop.Components.Mac.MDMenu (this, entrySet, CommandSource.ContextMenu, initialTarget, closeHandler);
 		}
 #endif
 
@@ -752,7 +797,24 @@ namespace MonoDevelop.Components.Commands
 		{
 			return CreateMenu (entrySet, new CommandMenu (this));
 		}
-		
+
+		/// <summary>
+		/// Creates a menu.
+		/// </summary>
+		/// <returns>
+		/// The menu.
+		/// </returns>
+		/// <param name='entrySet'>
+		/// Entry with the command definitions
+		/// </param>
+		/// <param name='closeHandler'>
+		/// EventHandler to be run when the menu closes
+		/// </param> 
+		public Gtk.Menu CreateMenu (CommandEntrySet entrySet, EventHandler closeHandler)
+		{
+			return CreateMenu (entrySet, new CommandMenu (this), closeHandler);
+		}
+
 		/// <summary>
 		/// Creates the menu.
 		/// </summary>
@@ -767,11 +829,34 @@ namespace MonoDevelop.Components.Commands
 		/// </param>
 		public Gtk.Menu CreateMenu (CommandEntrySet entrySet, object initialTarget)
 		{
-			var menu = (CommandMenu) CreateMenu (entrySet, new CommandMenu (this));
-			menu.InitialCommandTarget = initialTarget;
-			return menu;
+			return CreateMenu (entrySet, initialTarget, null);
 		}
 		
+		/// <summary>
+		/// Creates the menu.
+		/// </summary>
+		/// <returns>
+		/// The menu.
+		/// </returns>
+		/// <param name='entrySet'>
+		/// Entry with the command definitions
+		/// </param>
+		/// <param name='initialTarget'>
+		/// Initial command route target. The command handler will start looking for command handlers in this object.
+		/// </param>
+		/// <param name='closeHandler'>
+		/// EventHandler to be run when the menu closes
+		/// </param> 
+		public Gtk.Menu CreateMenu (CommandEntrySet entrySet, object initialTarget, EventHandler closeHandler)
+		{
+			var menu = (CommandMenu) CreateMenu (entrySet, new CommandMenu (this));
+			menu.InitialCommandTarget = initialTarget;
+			if (closeHandler != null) {
+				menu.Hidden += closeHandler;
+			}
+			return menu;
+		}
+
 		/// <summary>
 		/// Shows a context menu.
 		/// </summary>
@@ -790,17 +875,65 @@ namespace MonoDevelop.Components.Commands
 		public bool ShowContextMenu (Gtk.Widget parent, Gdk.EventButton evt, CommandEntrySet entrySet,
 			object initialCommandTarget = null)
 		{
+			return ShowContextMenu (parent, evt, entrySet, initialCommandTarget, null);
+		}
+
+		/// <summary>
+		/// Shows a context menu.
+		/// </summary>
+		/// <param name='parent'>
+		/// Widget for which the context menu is being shown
+		/// </param>
+		/// <param name='evt'>
+		/// Current event
+		/// </param>
+		/// <param name='entrySet'>
+		/// Entry with the command definitions
+		/// </param>
+		/// <param name='initialCommandTarget'>
+		/// Initial command route target. The command handler will start looking for command handlers in this object.
+		/// </param>
+		/// <param name='closeHandler'>
+		/// An event handler which will be called when the menu closes
+		/// </param>
+		public bool ShowContextMenu (Gtk.Widget parent, Gdk.EventButton evt, CommandEntrySet entrySet,
+			object initialCommandTarget, EventHandler closeHandler)
+		{
 #if MAC
-			var menu = CreateNSMenu (entrySet, initialCommandTarget);
+			var menu = CreateNSMenu (entrySet, initialCommandTarget, closeHandler);
 			ContextMenuExtensionsMac.ShowContextMenu (parent, evt, menu);
 #else
-			var menu = CreateMenu (entrySet);
+			var menu = CreateMenu (entrySet, closeHandler);
 			if (menu != null)
 				ShowContextMenu (parent, evt, menu, initialCommandTarget);
 #endif
 			return true;
 		}
-		
+
+		/// <summary>
+		/// Shows the context menu.
+		/// </summary>
+		/// <returns><c>true</c>, if context menu was shown, <c>false</c> otherwise.</returns>
+		/// <param name="parent">Widget for which the context menu is shown</param>
+		/// <param name="x">The x coordinate.</param>
+		/// <param name="y">The y coordinate.</param>
+		/// <param name="entrySet">Entry set with the command definitions</param>
+		/// <param name="initialCommandTarget">Initial command target.</param>
+		public bool ShowContextMenu (Gtk.Widget parent, int x, int y, CommandEntrySet entrySet,
+			object initialCommandTarget = null)
+		{
+#if MAC
+			var menu = CreateNSMenu (entrySet, initialCommandTarget);
+			ContextMenuExtensionsMac.ShowContextMenu (parent, x, y, menu);
+#else
+			var menu = CreateMenu (entrySet);
+			if (menu != null)
+				ShowContextMenu (parent, x, y, menu, initialCommandTarget);
+#endif
+
+			return true;
+		}
+
 		/// <summary>
 		/// Shows a context menu.
 		/// </summary>
@@ -825,7 +958,17 @@ namespace MonoDevelop.Components.Commands
 
 			Mono.TextEditor.GtkWorkarounds.ShowContextMenu (menu, parent, evt);
 		}
-		
+
+		public void ShowContextMenu (Gtk.Widget parent, int x, int y, Gtk.Menu menu,
+			object initialCommandTarget = null)
+		{
+			if (menu is CommandMenu) {
+				((CommandMenu)menu).InitialCommandTarget = initialCommandTarget ?? parent;
+			}
+
+			Mono.TextEditor.GtkWorkarounds.ShowContextMenu (menu, parent, x, y);
+		}
+
 		/// <summary>
 		/// Creates a toolbar.
 		/// </summary>

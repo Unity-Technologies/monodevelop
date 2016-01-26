@@ -28,6 +28,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Linq;
 
 namespace MonoDevelop.Core
 {
@@ -44,6 +45,9 @@ namespace MonoDevelop.Core
 
 		public FilePath (string name)
 		{
+			if (name != null && name.Length > 6 && name[0] == 'f' && name.StartsWith ("file://", StringComparison.Ordinal))
+				name = new Uri (name).LocalPath;
+
 			fileName = name;
 		}
 
@@ -65,10 +69,22 @@ namespace MonoDevelop.Core
 
 		const int PATHMAX = 4096 + 1;
 
+		static readonly char[] invalidPathChars = Path.GetInvalidPathChars ().Concat ("#%&").ToArray ();
+		public static char[] GetInvalidPathChars()
+		{
+			return (char[])invalidPathChars.Clone();
+		}
+
+		static readonly char[] invalidFileNameChars = Path.GetInvalidFileNameChars ().Concat ("#%&").ToArray ();
+		public static char[] GetInvalidFileNameChars ()
+		{
+			return (char[])invalidFileNameChars.Clone ();
+		}
+
 		[DllImport ("libc")]
 		static extern IntPtr realpath (string path, IntPtr buffer);
 
-		public FilePath ResolveFullPath ()
+		public FilePath ResolveLinks ()
 		{
 			if (Platform.IsWindows) {
 				return Path.GetFullPath (this);
@@ -107,10 +123,12 @@ namespace MonoDevelop.Core
 				if (string.IsNullOrEmpty (fileName))
 					return FilePath.Empty;
 				string fp = Path.GetFullPath (fileName);
-				if (fp.Length > 0 && fp [fp.Length - 1] == Path.DirectorySeparatorChar)
-					return fp.TrimEnd (Path.DirectorySeparatorChar);
-				if (fp.Length > 0 && fp [fp.Length - 1] == Path.AltDirectorySeparatorChar)
-					return fp.TrimEnd (Path.AltDirectorySeparatorChar);
+				if (fp.Length > 0) {
+					if (fp [fp.Length - 1] == Path.DirectorySeparatorChar)
+						return fp.TrimEnd (Path.DirectorySeparatorChar);
+					if (fp [fp.Length - 1] == Path.AltDirectorySeparatorChar)
+						return fp.TrimEnd (Path.AltDirectorySeparatorChar);
+				}
 				return fp;
 			}
 		}

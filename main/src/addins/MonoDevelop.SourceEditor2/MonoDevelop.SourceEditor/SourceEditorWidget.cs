@@ -911,7 +911,7 @@ namespace MonoDevelop.SourceEditor
 		{
 			if (UseIncorrectMarkers || DefaultSourceEditorOptions.Instance.LineEndingConversion == LineEndingConversion.LeaveAsIs)
 				return;
-			ShowIncorretEolMarkers (Document.FileName, multiple);
+			ShowIncorrectEolMarkers (Document.FileName, multiple);
 		}
 
 		internal bool EnsureCorrectEolMarker (string fileName)
@@ -921,9 +921,9 @@ namespace MonoDevelop.SourceEditor
 			if (HasIncorrectEolMarker) {
 				switch (DefaultSourceEditorOptions.Instance.LineEndingConversion) {
 				case LineEndingConversion.Ask:
-					var hasMultipleIncorretEolMarkers = FileRegistry.HasMultipleIncorretEolMarkers;
-					ShowIncorretEolMarkers (fileName, hasMultipleIncorretEolMarkers);
-					if (hasMultipleIncorretEolMarkers) {
+					var hasMultipleIncorrectEolMarkers = FileRegistry.HasMultipleIncorrectEolMarkers;
+					ShowIncorrectEolMarkers (fileName, hasMultipleIncorrectEolMarkers);
+					if (hasMultipleIncorrectEolMarkers) {
 						FileRegistry.UpdateEolMessages ();
 					}
 					return false;
@@ -971,7 +971,7 @@ namespace MonoDevelop.SourceEditor
 
 		OverlayMessageWindow messageOverlayWindow;
 
-		void ShowIncorretEolMarkers (string fileName, bool multiple)
+		void ShowIncorrectEolMarkers (string fileName, bool multiple)
 		{
 			RemoveMessageBar ();
 			messageOverlayWindow = new OverlayMessageWindow ();
@@ -1493,6 +1493,11 @@ namespace MonoDevelop.SourceEditor
 				if (TextEditor.IsSomethingSelected) {
 					startLine = Document.GetLineByOffset (textEditor.SelectionRange.Offset);
 					endLine = Document.GetLineByOffset (textEditor.SelectionRange.EndOffset);
+
+					// If selection ends at begining of line... This is visible as previous line
+					// is selected, hence we want to select previous line Bug 26287
+					if (endLine.Offset == textEditor.SelectionRange.EndOffset)
+						endLine = endLine.PreviousLine;
 				} else {
 					startLine = endLine = Document.GetLine (textEditor.Caret.Line);
 				}

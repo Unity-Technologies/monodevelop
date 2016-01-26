@@ -31,12 +31,12 @@ using System.Collections.Generic;
 using MonoDevelop.Projects;
 using MonoDevelop.CSharp.Project;
 using MonoDevelop.Ide.Tasks;
-using Mono.CSharp;
 using System.Linq;
 using ICSharpCode.NRefactory;
 using MonoDevelop.CSharp.Refactoring.CodeActions;
 using MonoDevelop.Core;
 using ICSharpCode.NRefactory.CSharp.Resolver;
+using ICSharpCode.NRefactory.MonoCSharp;
 
 namespace MonoDevelop.CSharp.Parser
 {
@@ -86,7 +86,14 @@ namespace MonoDevelop.CSharp.Parser
 
 			result.CreateRefactoringContext = delegate (MonoDevelop.Ide.Gui.Document doc, System.Threading.CancellationToken token) {
 				var task = MDRefactoringContext.Create (doc, doc.Editor.Caret.Location, token);
-				task.Wait (5000, token);
+				try {
+					task.Wait (5000, token);
+				} catch (AggregateException ae) {
+					ae.Flatten ().Handle (aex => aex is OperationCanceledException);
+					return null;
+				} catch (OperationCanceledException) {
+					return null;
+				}
 				if (!task.IsCompleted)
 					return null;
 				return task.Result;

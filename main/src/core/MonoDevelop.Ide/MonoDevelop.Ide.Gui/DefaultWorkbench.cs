@@ -386,11 +386,15 @@ namespace MonoDevelop.Ide.Gui
 			} else
 				type = "(not a file)";
 
-			Counters.DocumentOpened.Inc (new Dictionary<string,string> () {
-				{ "FileType", type},
-				{ "DisplayBinding", content.GetType ().FullName},
-				{ "DisplayBindingAndType", type + " | " + content.GetType ().FullName},
-			});
+			var metadata = new Dictionary<string,string> () {
+				{ "FileType", type },
+				{ "DisplayBinding", content.GetType ().FullName },
+			};
+
+			if (isFile)
+				metadata ["DisplayBindingAndType"] = type + " | " + content.GetType ().FullName;
+
+			Counters.DocumentOpened.Inc (metadata);
 
 			var mimeimage = PrepareShowView (content);
 			var addToControl = notebook ?? DockNotebook.ActiveNotebook ?? tabControl;
@@ -706,10 +710,11 @@ namespace MonoDevelop.Ide.Gui
 			}
 
 			if (showDirtyDialog) {
-				DirtyFilesDialog dlg = new DirtyFilesDialog ();
-				dlg.Modal = true;
-				if (MessageService.ShowCustomDialog (dlg, this) != (int)Gtk.ResponseType.Ok)
-					return false;
+				using (DirtyFilesDialog dlg = new DirtyFilesDialog ()) {
+					dlg.Modal = true;
+					if (MessageService.ShowCustomDialog (dlg, this) != (int)Gtk.ResponseType.Ok)
+						return false;
+				}
 			}
 			
 			if (!IdeApp.Workspace.Close (false, false))
