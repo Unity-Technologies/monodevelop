@@ -98,6 +98,7 @@ namespace MonoDevelop.Ide.Tasks
 			cellRendCompleted.Toggled += new ToggledHandler (UserTaskCompletedToggled);
 			cellRendCompleted.Activatable = true;
 			col = view.AppendColumn (String.Empty, cellRendCompleted, "active", Columns.Completed);
+			col.SortColumnId = (int)Columns.Completed;
 
 			cellRendDesc = view.TextRenderer;
 			cellRendDesc.Editable = true;
@@ -263,12 +264,14 @@ namespace MonoDevelop.Ide.Tasks
 				}
 			}
 		}
-		
+
 		void UserTaskPriorityEdited (object o, ComboSelectionChangedArgs args)
 		{
-			Gtk.TreeIter iter;
-			if (store.GetIterFromString (out iter,  args.Path)) {
-				Task task = (Task) store.GetValue (iter, (int)Columns.UserTask);
+			Gtk.TreeIter iter, sortedIter;
+
+			if (sortModel.GetIterFromString (out sortedIter, args.Path)) {
+				iter = sortModel.ConvertIterToChildIter (sortedIter);
+				Task task = (Task) sortModel.GetValue (sortedIter, (int)Columns.UserTask);
 				if (args.Active == 0)
 				{
 					task.Priority = TaskPriority.High;
@@ -287,10 +290,12 @@ namespace MonoDevelop.Ide.Tasks
 		
 		void UserTaskCompletedToggled (object o, ToggledArgs args)
 		{
-			Gtk.TreeIter iter;
-			if (store.GetIterFromString (out iter, args.Path)) {
-				bool val = (bool)store.GetValue (iter, (int)Columns.Completed);
-				Task task = (Task) store.GetValue (iter, (int)Columns.UserTask);
+			Gtk.TreeIter iter, sortedIter;
+
+			if (sortModel.GetIterFromString (out sortedIter, args.Path)) {
+				iter = sortModel.ConvertIterToChildIter (sortedIter);
+				bool val = (bool)sortModel.GetValue (sortedIter, (int)Columns.Completed);
+				Task task = (Task) sortModel.GetValue (sortedIter, (int)Columns.UserTask);
 				task.Completed = !val;
 				store.SetValue (iter, (int)Columns.Completed, !val);
 				store.SetValue (iter, (int)Columns.Bold, task.Completed ? (int)Pango.Weight.Light : (int)Pango.Weight.Bold);
@@ -300,9 +305,11 @@ namespace MonoDevelop.Ide.Tasks
 		
 		void UserTaskDescEdited (object o, EditedArgs args)
 		{
-			Gtk.TreeIter iter;
-			if (store.GetIterFromString (out iter,  args.Path)) {
-				Task task = (Task) store.GetValue (iter, (int)Columns.UserTask);
+			Gtk.TreeIter iter, sortedIter;
+
+			if (sortModel.GetIterFromString (out sortedIter, args.Path)) {
+				iter = sortModel.ConvertIterToChildIter (sortedIter);
+				Task task = (Task) sortModel.GetValue (sortedIter, (int)Columns.UserTask);
 				task.Description = args.NewText;
 				store.SetValue (iter, (int)Columns.Description, args.NewText);
 				TaskService.SaveUserTasks (task.WorkspaceObject);
