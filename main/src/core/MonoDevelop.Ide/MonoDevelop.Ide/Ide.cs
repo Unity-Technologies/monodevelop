@@ -46,6 +46,7 @@ using MonoDevelop.Components.AutoTest;
 using MonoDevelop.Ide.TypeSystem;
 using MonoDevelop.Ide.Extensions;
 using MonoDevelop.Ide.Templates;
+using System.Threading.Tasks;
 
 namespace MonoDevelop.Ide
 {
@@ -334,7 +335,7 @@ namespace MonoDevelop.Ide
 			//open the firsts sln/workspace file, and remove the others from the list
 		 	//FIXME: can we handle multiple slns?
 			bool foundSln = false;
-			IAsyncOperation openSolutionOperation = null;
+			Task<bool> openSolutionOperation = null;
 			foreach (var file in files) {
 				if (Services.ProjectService.IsWorkspaceItemFile (file.FileName) ||
 				    Services.ProjectService.IsSolutionItemFile (file.FileName)) {
@@ -351,13 +352,13 @@ namespace MonoDevelop.Ide
 					filteredFiles.Add (file);
 				}
 			}
-			
+
 			// Wait for solution and it's open files to load, so we are sure
 			// that the files we open afterwards are actually opened in tabs
 			// after the solution's saved open files and that the last file
 			// in the filteredFiles gets focus, if specified as an option.
 			if (filteredFiles.Count > 0 && openSolutionOperation != null)
-				openSolutionOperation.WaitForCompleted();
+				openSolutionOperation.Wait ();
 
 			foreach (var file in filteredFiles) {
 				try {

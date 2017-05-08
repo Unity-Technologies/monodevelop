@@ -470,7 +470,7 @@ namespace MonoDevelop.Ide.Gui.Pads
 				columnProject.Active = view.Columns[VisibleColumns.Project].Visible;
 				columnPath.Active = view.Columns[VisibleColumns.Path].Visible;
 				columnCategory.Active = view.Columns[VisibleColumns.Category].Visible;
-				help.Sensitive = copy.Sensitive = jump.Sensitive =
+				copy.Sensitive = jump.Sensitive =
 					view.Selection != null &&
 					view.Selection.CountSelectedRows () > 0 &&
 					(columnType.Active ||
@@ -479,7 +479,7 @@ namespace MonoDevelop.Ide.Gui.Pads
 						columnDescription.Active ||
 						columnFile.Active ||
 						columnPath.Active);
-				string dummyString;
+				// string dummyString;
 				// help.Sensitive &= GetSelectedErrorReference (out dummyString);
 			};
 			
