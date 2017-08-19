@@ -342,8 +342,9 @@ namespace MonoDevelop.MacIntegration.MainToolbar
 		{
 			nfloat right = Layer.Frame.Width;
 			CATransaction.DisableActions = true;
+			if(Layer.Sublayers != null)
 			foreach (var item in Layer.Sublayers) {
-				if (item.Name != null && item.Name.StartsWith (StatusIconPrefixId, StringComparison.Ordinal)) {
+				if (item != null && item.Name != null && item.Name.StartsWith (StatusIconPrefixId, StringComparison.Ordinal)) {
 					var icon = layerToStatus [item.Name];
 					RemoveTrackingArea (icon.TrackingArea);
 
