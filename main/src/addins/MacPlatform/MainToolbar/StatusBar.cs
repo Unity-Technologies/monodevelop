@@ -202,6 +202,7 @@ namespace MonoDevelop.MacIntegration.MainToolbar
 					return;
 
 				ReconstructString ();
+				if(Layer.Sublayers != null)
 				foreach (var layer in Layer.Sublayers) {
 					if (layer.Name != null && layer.Name.StartsWith (StatusIconPrefixId, StringComparison.Ordinal))
 						layer.SetImage (layerToStatus [layer.Name].Image, Window.BackingScaleFactor);
